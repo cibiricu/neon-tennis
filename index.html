@@ -4626,9 +4626,15 @@ let p1TouchId=null, p1LastX=0;
 let p2TouchId=null, p2LastX=0, p2dxAccum=0;
 
 function handleTouchStart(e){
-  e.preventDefault();
   if(STATE!=='play') return;
   for(const t of e.changedTouches){
+    // Ignore touches on buttons/modals (let them handle their own events)
+    const tag = t.target && t.target.tagName;
+    if(tag==='BUTTON'||tag==='INPUT'||tag==='SELECT') continue;
+    const cl = t.target && t.target.className || '';
+    if(typeof cl==='string' && (cl.includes('btn')||cl.includes('modal')||cl.includes('shop'))) continue;
+
+    e.preventDefault();
     const y=t.clientY, x=t.clientX;
     if(twoPlayer && y < H*.5){
       if(serving && serverWho==='cpu'){launchBall();break;}
@@ -4641,6 +4647,8 @@ function handleTouchStart(e){
 }
 
 function handleTouchMove(e){
+  if(STATE!=='play') return;
+  if(p1TouchId===null && p2TouchId===null) return;
   e.preventDefault();
   for(const t of e.changedTouches){
     if(t.identifier===p1TouchId){
@@ -4661,16 +4669,17 @@ function handleTouchEnd(e){
   }
 }
 
-// Attach to canvas with passive:false so preventDefault works
-canvas.addEventListener('touchstart', handleTouchStart, {passive:false});
-canvas.addEventListener('touchmove',  handleTouchMove,  {passive:false});
-canvas.addEventListener('touchend',   handleTouchEnd,   {passive:false});
-canvas.addEventListener('touchcancel',handleTouchEnd,   {passive:false});
+// Use document-level listeners so HUD overlay never blocks touch
+document.addEventListener('touchstart', handleTouchStart, {passive:false});
+document.addEventListener('touchmove',  handleTouchMove,  {passive:false});
+document.addEventListener('touchend',   handleTouchEnd,   {passive:false});
+document.addEventListener('touchcancel',handleTouchEnd,   {passive:false});
 
-// Also handle window-level touch for serve outside canvas bounds
+// Keyboard serve fallback
 window.addEventListener('touchstart',e=>{
   if(STATE!=='play'||e.target===canvas)return;
-  if(serving&&serverWho==='player')launchBall();
+  const tag=e.target&&e.target.tagName;
+  if(tag==='BUTTON'||tag==='INPUT')return;
 },{passive:true});
 
 // Keep old pointer/input variables wired for keyboard (desktop) use
