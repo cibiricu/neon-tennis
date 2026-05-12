@@ -773,21 +773,6 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .survival-hud.visible{display:flex}
 .survival-wave{font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:900;color:#ff9500;text-shadow:0 0 10px #ff9500;letter-spacing:.06em}
 
-/* ══ MISSIONS ══ */
-/* missions-btn CSS removed — button now in main menu only */
-/* missions-pip CSS removed */
-.missions-modal{position:absolute;inset:0;z-index:55;display:flex;align-items:flex-end;padding:16px;pointer-events:none;opacity:0;transition:opacity .25s ease;background:rgba(2,0,8,.0)}
-.missions-modal.show{opacity:1;pointer-events:auto;background:rgba(2,0,8,.7)}
-.missions-card{width:100%;max-width:420px;margin:0 auto;border-radius:22px;background:linear-gradient(160deg,rgba(8,16,40,.99),rgba(4,9,22,.97));border:1px solid rgba(255,215,0,.18);padding:16px;display:flex;flex-direction:column;gap:10px;max-height:65vh;overflow-y:auto}
-.mission-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
-.mission-row.done{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.06)}
-.mission-icon{font-size:20px;flex-shrink:0}
-.mission-info{flex:1;min-width:0}
-.mission-name{font-family:'Orbitron','Courier New',monospace;font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em}
-.mission-prog{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
-.mission-bar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:5px}
-.mission-bar-fill{height:100%;border-radius:2px;background:#ffd700;transition:width .4s ease}
-.mission-reward{font-family:'Orbitron','Courier New',monospace;font-size:9px;font-weight:900;color:#ffd700;flex-shrink:0}
 
 /* ══ COINS ══ */
 .coins-display{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2)}
@@ -917,8 +902,6 @@ if('serviceWorker' in navigator){
 <div class="survival-hud" id="survivalHud"><div class="survival-wave" id="survivalWave">OLA 1</div></div>
 <!-- Last point slow-mo overlay -->
 <div class="lastpoint-overlay" id="lastPointOverlay"></div>
-<!-- Missions modal -->
-<div class="missions-modal" id="missionsModal"><div class="missions-card" id="missionsList"></div></div>
 <!-- Settings modal -->
 <div class="settings-modal" id="settingsModal">
   <div class="settings-card">
@@ -1016,7 +999,7 @@ if('serviceWorker' in navigator){
     <!-- Play -->
     <button class="btn-mega" id="newBtn" style="margin-bottom:6px"><span style="font-size:18px">⚡</span> NUEVA PARTIDA</button>
 
-    <!-- Secondary buttons: 2 rows of 3 + misiones -->
+    <!-- Secondary buttons -->
     <div class="menu-row" style="margin-bottom:5px">
       <button class="btn-sec" id="contBtn">▶ CONTINUAR</button>
       <button class="btn-sec" id="skinsToggle">🎨 SKINS</button>
@@ -1026,9 +1009,6 @@ if('serviceWorker' in navigator){
       <button class="btn-sec" id="survivalBtn">💀 SUPERVIVENCIA</button>
       <button class="btn-sec" id="shopBtn">🛒 TIENDA</button>
       <button class="btn-sec" id="settingsBtn">⚙ CONFIG</button>
-    </div>
-    <div class="menu-row" style="margin-bottom:5px">
-      <button class="btn-sec" id="missionsMenuBtn" style="flex:1;border-color:rgba(255,215,0,.35);color:#ffd700">📋 MISIONES DEL DÍA</button>
     </div>
 
     <!-- Coins -->
@@ -1607,7 +1587,6 @@ function showCombo(){
   showCombo._t=setTimeout(()=>comboBadgeEl.classList.remove('show'),2500);
   if(tier>=3){doShake(6,.12);vibrate([30,20,30])}
   if(tier>=5){bgPulse=.8;bgPulseColor=c;vibrate([50,30,50,30,50])}
-  checkMission('comboMax',combo);
 }
 
 function showRecord(){
@@ -1778,7 +1757,6 @@ function applyPower(effect,color){
       doShake(10,.2);
       toast('🔥 INFERNO — GOLPEA PARA ATRAVESAR!','#ff6600');
       playFx('powerup');
-      checkMission('fire');
       vibrate([30,20,80,20,30]);
       break;
     }
@@ -1806,7 +1784,6 @@ function applyPower(effect,color){
       doShake(10,.25);
       toast('❄️ CRYO! CPU CONGELADA 2s','#55ddff');
       playFx('powerup');
-      checkMission('cryo');
       vibrate([100,50,100]); // two heavy thumps = freezing impact
       break;
     }
@@ -2073,13 +2050,9 @@ function scorePoint(winner){
     burst(ball.x,ball.y,'#00fff7',35,480);
     burstRing(ball.x,ball.y,'#00fff7');
     burstRing(ball.x,ball.y,'rgba(0,255,247,.4)');
-    // Missions
-    const streak=(missionProgress._streak||0)+1;
-    missionProgress._streak=streak;
-    checkMission('streak',streak);
   }else{
     g.cs++;scoreFlash.c=.55;
-    combo=0;missionProgress._streak=0;
+    combo=0;
     comboBadgeEl.classList.remove('show');
     playFx('lose');
     toast('CPU ANOTA','#ff2255');
@@ -2316,7 +2289,6 @@ function updateGeoBoss(dt){
       bgPulse=1.5;bgPulseColor=c;
       toast(`💥 ${geoBoss.name} DESTRUIDO!`,c);
       playFx('boss');
-      checkMission('boss');
     }
   }
 }
@@ -2391,19 +2363,6 @@ let replayBall={x:0,y:0};
 let replayPlayer={x:0};
 let replayCpu={x:0};
 
-/* ═══ MISSIONS ═══ */
-const MISSION_DEFS=[
-  {id:'pts3',icon:'⚡',name:'RACHA DE 3',desc:'Anota 3 puntos seguidos',goal:3,reward:15,track:'streak'},
-  {id:'fire2',icon:'🔥',name:'INFERNO x2',desc:'Usa el poder fuego 2 veces',goal:2,reward:20,track:'fire'},
-  {id:'perfect5',icon:'✦',name:'5 PERFECTOS',desc:'Da 5 golpes perfectos',goal:5,reward:25,track:'perfect'},
-  {id:'cryo3',icon:'❄️',name:'CONGELADOR',desc:'Usa cryo 3 veces',goal:3,reward:20,track:'cryo'},
-  {id:'boss1',icon:'⬡',name:'CAZABOSS',desc:'Destruye 1 boss de nivel',goal:1,reward:50,track:'boss'},
-  {id:'combo10',icon:'🔥',name:'COMBO x10',desc:'Alcanza un combo de 10',goal:10,reward:30,track:'comboMax'},
-  {id:'survive10',icon:'💀',name:'SUPERVIVIENTE',desc:'Sobrevive 10 oleadas',goal:10,reward:60,track:'wave'},
-  {id:'coins50',icon:'🪙',name:'COLECCIONISTA',desc:'Acumula 50 monedas',goal:50,reward:0,track:'coins'},
-];
-let missionProgress={};  // {missionId: current}
-let completedMissions=new Set();
 
 /* ═══ SLOW-MO LAST POINT ═══ */
 let lastPointSlowMo=false;
@@ -3030,7 +2989,6 @@ function update(dt){
       skinHitEffect(sk, ball.x, ball.y, player.x, player.y, player.w, true);
       addXP(sk.power==='doubleXP'||sessionBoosts.doubleXP?4:2);
       playFx('hitPerfect');
-      checkMission('perfect');
       window._gameVibrate(20);
       if(survivalMode&&itemBoosts.alwaysSlowPerfect) doSlow(.4,.25);
       // SKIN POWER: ARCTIC STORM
@@ -4604,7 +4562,7 @@ function startSession(){
   if(reviveAdBtn)reviveAdBtn.classList.remove('used');
   if(doubleCoinsAdBtn)doubleCoinsAdBtn.classList.remove('used');
   boosterUsedThisSession=false;updateBoosterBtn();
-  missionProgress._streak=0;
+  
   shieldActive=false;
   sessionBoosts.doubleXP=false;
   sessionBoosts.paddleSpeed=1;sessionBoosts.paddleSpeedT=0;
@@ -4997,9 +4955,6 @@ function addCoins(n,x,y,source='game'){
   if(source==='game')sessionCoinsEarned+=n;
   saveSettings();
   updateCoinsUI();
-  // Track mission
-  missionProgress.coins50=(missionProgress.coins50||0)+n;
-  checkMission('coins50');
   // Float popup
   if(x&&y){
     const el=document.createElement('div');
@@ -5611,7 +5566,6 @@ const STRINGS={
     cfgTitle:'⚙ CONFIGURACIÓN', cfgMusic:'VOLUMEN MÚSICA', cfgFx:'VOLUMEN FX',
     cfgVib:'VIBRACIÓN', cfgLang:'IDIOMA', cfgQuality:'CALIDAD GRÁFICA',
     qLow:'BAJA', qNormal:'NORMAL', qHigh:'ALTA ✦',
-    missions:'📋 MISIONES', misTitle:'MISIONES DEL DÍA',
     scoreYou:'✦ PUNTO!', scoreCpu:'CPU ANOTA',
     serve:'TOCA PARA SERVIR', serveP1:'P1 TOCA PARA SERVIR', serveP2:'P2 TOCA PARA SERVIR',
     wave:'💀 OLA', gameOver:'GAME OVER', winner:'GANA', rematch:'↺ REVANCHE', menu:'☰ MENÚ',
@@ -5627,7 +5581,6 @@ const STRINGS={
     cfgTitle:'⚙ SETTINGS', cfgMusic:'MUSIC VOLUME', cfgFx:'FX VOLUME',
     cfgVib:'VIBRATION', cfgLang:'LANGUAGE', cfgQuality:'GRAPHIC QUALITY',
     qLow:'LOW', qNormal:'NORMAL', qHigh:'HIGH ✦',
-    missions:'📋 MISSIONS', misTitle:'DAILY MISSIONS',
     scoreYou:'✦ POINT!', scoreCpu:'CPU SCORES',
     serve:'TAP TO SERVE', serveP1:'P1 TAP TO SERVE', serveP2:'P2 TAP TO SERVE',
     wave:'💀 WAVE', gameOver:'GAME OVER', winner:'WINS', rematch:'↺ REMATCH', menu:'☰ MENU',
@@ -5667,8 +5620,6 @@ function applyTranslation(){
   if(ql[3])ql[3].textContent=t('cfgQuality');
   if(ql[4])ql[4].textContent=t('cfgLang');
   const stitle=document.querySelector('.settings-title');if(stitle)stitle.textContent=t('cfgTitle');
-  // Missions button
-  // missions button text updated via missionsMenuBtn if needed
   // Pause buttons
   const rb=document.getElementById('resumeBtn');if(rb)rb.textContent=t('resume');
   const mb=document.getElementById('menuBtn');if(mb)mb.textContent=t('backMenu');
@@ -5693,16 +5644,12 @@ function loadSettings(){
 function saveSettings(){
   try{localStorage.setItem('ntr4_settings',JSON.stringify(settings));
   localStorage.setItem('ntr4_coins',coins);
-  localStorage.setItem('ntr4_missions',JSON.stringify({p:missionProgress,c:[...completedMissions]}));
   }catch(e){}
 }
 function loadPersistence(){
   loadSettings();
   try{
     coins=parseInt(localStorage.getItem('ntr4_coins')||'0');
-    const ms=JSON.parse(localStorage.getItem('ntr4_missions')||'{}');
-    if(ms.p)missionProgress=ms.p;
-    if(ms.c)completedMissions=new Set(ms.c);
   }catch(e){}
 }
 
@@ -5762,46 +5709,6 @@ window._gameVibrate=function(ms){
   try{if(navigator.vibrate)navigator.vibrate(ms)}catch(e){}
 };
 
-/* ═══════════════════════════════════════════
-   MISSIONS
-═══════════════════════════════════════════ */
-function checkMission(track,amount=1){
-  MISSION_DEFS.forEach(m=>{
-    if(m.track!==track||completedMissions.has(m.id))return;
-    missionProgress[m.id]=(missionProgress[m.id]||0)+amount;
-    if(missionProgress[m.id]>=m.goal){
-      completedMissions.add(m.id);
-      addCoins(m.reward);
-      toast(`🎯 MISIÓN: ${m.name} +${m.reward}🪙`,'#ffd700');
-      saveSettings();
-    }
-  });
-}
-
-function renderMissions(){
-  const list=document.getElementById('missionsList');
-  if(!list)return;
-  list.innerHTML='<div style="font-family:Orbitron,monospace;font-size:11px;color:#ffd700;font-weight:900;letter-spacing:.1em;padding:4px 0 8px">📋 MISIONES DEL DÍA</div>';
-  MISSION_DEFS.forEach(m=>{
-    const done=completedMissions.has(m.id);
-    const prog=Math.min(missionProgress[m.id]||0,m.goal);
-    const pct=Math.round(prog/m.goal*100);
-    list.innerHTML+=`<div class="mission-row${done?' done':''}">
-      <div class="mission-icon">${m.icon}</div>
-      <div class="mission-info">
-        <div class="mission-name">${m.name}</div>
-        <div class="mission-prog">${m.desc} · ${prog}/${m.goal}</div>
-        <div class="mission-bar"><div class="mission-bar-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="mission-reward">${done?'✓':'+'+m.reward+'🪙'}</div>
-    </div>`;
-  });
-}
-
-const missionsModal=document.getElementById('missionsModal');
-missionsModal.addEventListener('click',e=>{if(e.target===missionsModal)missionsModal.classList.remove('show')});
-const missionsMenuBtn=document.getElementById('missionsMenuBtn');
-if(missionsMenuBtn)missionsMenuBtn.addEventListener('click',()=>{renderMissions();missionsModal.classList.add('show')});
 
 /* ═══════════════════════════════════════════
    SURVIVAL MODE
@@ -5834,7 +5741,6 @@ function nextSurvivalWave(){
   survivalWave++;
   survivalCpuBoost=1+survivalWave*.1;
   updateSurvivalHUD();
-  checkMission('wave',survivalWave);
 
   // Speed info for toast
   const waveSpd=Math.round(Math.min(240+(survivalWave-1)*60, 1400));
