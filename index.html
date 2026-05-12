@@ -147,9 +147,9 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
   position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;
   width:100%;max-width:420px;
-  padding:max(8px,env(safe-area-inset-top,8px)) 14px max(14px,env(safe-area-inset-bottom,14px));
+  padding:16px 20px 24px;
   min-height:100%;
-  justify-content:flex-start;
+  justify-content:center;
   gap:0;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
@@ -157,9 +157,9 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 }
 
 /* Logo area */
-.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:4px;flex-shrink:0}
+.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:6px}
 .logo-ball-wrap{
-  width:56px;height:56px;margin-bottom:4px;
+  width:68px;height:68px;margin-bottom:6px;
   position:relative;
 }
 .logo-ball{
@@ -201,7 +201,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 
 .menu-title{
   font-family:'Orbitron','Courier New',monospace;
-  font-size:clamp(20px,5.5vw,30px);
+  font-size:clamp(22px,6vw,34px);
   font-weight:900;letter-spacing:.06em;line-height:.95;
   background:linear-gradient(135deg,#00fff7 0%,#39ff14 40%,#ffe600 70%,#00fff7 100%);
   background-size:300% 100%;
@@ -240,8 +240,8 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 
 /* Main play button */
 .btn-mega{
-  width:100%;height:54px;border-radius:16px;
-  font-family:'Orbitron','Courier New',monospace;font-size:15px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+  width:100%;height:50px;border-radius:16px;
+  font-family:'Orbitron','Courier New',monospace;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
   border:1px solid rgba(0,255,247,.5);
   background:linear-gradient(135deg,rgba(0,255,247,.2) 0%,rgba(57,255,20,.12) 100%);
   color:#00fff7;cursor:pointer;touch-action:manipulation;
@@ -667,42 +667,6 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .shop-ad-row .reward-btn{width:100%}
 .ad-small-note{font-size:9px;color:rgba(255,255,255,.38);font-family:'Orbitron','Courier New',monospace;letter-spacing:.08em}
 
-/* FIX MENU VISIBILITY: main buttons always clear and high in menu */
-.main-play-btn{
-  margin:4px 0 8px!important;
-  min-height:54px!important;
-  flex-shrink:0!important;
-  color:#001014!important;
-  background:linear-gradient(135deg,#00fff7,#39ff14)!important;
-  border:1px solid rgba(255,255,255,.55)!important;
-  box-shadow:0 0 26px rgba(0,255,247,.45),0 0 44px rgba(57,255,20,.22)!important;
-  text-shadow:0 1px 0 rgba(255,255,255,.35)!important;
-}
-.main-missions-btn{
-  width:100%!important;
-  margin-bottom:7px!important;
-  flex:0 0 auto!important;
-  min-height:44px!important;
-  border-color:rgba(255,215,0,.65)!important;
-  background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(255,149,0,.08))!important;
-  color:#ffd700!important;
-  box-shadow:0 0 18px rgba(255,215,0,.18)!important;
-}
-@media(max-height:720px){
-  .menu-content{padding-top:6px!important;padding-bottom:8px!important}
-  .logo-ball-wrap{width:42px!important;height:42px!important;margin-bottom:2px!important}
-  .logo-ring2,.logo-ring3{display:none!important}
-  .menu-title{font-size:22px!important}
-  .menu-sub{display:none!important}
-  .menu-stats{margin-bottom:4px!important}
-  .stat-box{padding:5px 4px!important}
-  .stat-val{font-size:13px!important}
-  .mode-btn,.diff-btn{padding:6px 0!important}
-  .btn-sec{height:36px!important;font-size:8px!important}
-  .btn-mega{height:48px!important;min-height:48px!important}
-  .skin-section.open{max-height:150px;overflow:auto}
-}
-
 .hidden{display:none!important}
 
 /* ══ IN-GAME ITEM BAR ══ */
@@ -1049,24 +1013,22 @@ if('serviceWorker' in navigator){
       <button class="diff-btn" data-d="hard">🔴 DIFÍCIL</button>
     </div>
 
-    <!-- Play: siempre visible en el menú principal -->
-    <button class="btn-mega main-play-btn" id="newBtn"><span style="font-size:22px">⚡</span> NUEVA PARTIDA</button>
+    <!-- Play -->
+    <button class="btn-mega" id="newBtn" style="margin-bottom:6px"><span style="font-size:18px">⚡</span> NUEVA PARTIDA</button>
 
-    <!-- Misiones visibles en el menú principal -->
-    <button class="btn-sec main-missions-btn" id="missionsMenuBtn">📋 MISIONES DEL DÍA</button>
-
-    <!-- Secondary buttons: main menu actions -->
+    <!-- Secondary buttons: 2 rows of 3 + misiones -->
     <div class="menu-row" style="margin-bottom:5px">
       <button class="btn-sec" id="contBtn">▶ CONTINUAR</button>
       <button class="btn-sec" id="skinsToggle">🎨 SKINS</button>
       <button class="btn-sec" id="rankingBtn">🏆 RANKING</button>
     </div>
     <div class="menu-row" style="margin-bottom:5px">
+      <button class="btn-sec" id="survivalBtn">💀 SUPERVIVENCIA</button>
       <button class="btn-sec" id="shopBtn">🛒 TIENDA</button>
       <button class="btn-sec" id="settingsBtn">⚙ CONFIG</button>
     </div>
     <div class="menu-row" style="margin-bottom:5px">
-      <button class="btn-sec" id="survivalBtn" style="flex:1">💀 SUPERVIVENCIA</button>
+      <button class="btn-sec" id="missionsMenuBtn" style="flex:1;border-color:rgba(255,215,0,.35);color:#ffd700">📋 MISIONES DEL DÍA</button>
     </div>
 
     <!-- Coins -->
@@ -5683,7 +5645,6 @@ function applyTranslation(){
   const rk=document.getElementById('rankingBtn');if(rk)rk.textContent=t('ranking');
   const sv=document.getElementById('survivalBtn');if(sv)sv.textContent=t('survival');
   const cfg=document.getElementById('settingsBtn');if(cfg)cfg.textContent=t('config');
-  const ms=document.getElementById('missionsMenuBtn');if(ms)ms.textContent=t('missions');
   const m1=document.getElementById('mode1p');if(m1)m1.textContent=t('mode1p');
   const m2=document.getElementById('mode2p');if(m2)m2.textContent=t('mode2p');
   // Difficulty buttons
