@@ -112,7 +112,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 /* ══ PAUSE BUTTON (in-game, bottom-right) ══ */
 .pause-btn{
   width:40px;height:40px;border-radius:10px;
-  display:none;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   background:rgba(0,8,22,.82);
   border:1px solid rgba(255,255,255,.18);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -120,10 +120,10 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
   pointer-events:auto;touch-action:manipulation;
   transition:opacity .2s,transform .15s;
   box-shadow:0 4px 16px rgba(0,0,0,.4);
-  flex-shrink:0;align-self:flex-start;margin-top:2px;
+  opacity:0;visibility:hidden;
 }
 .pause-btn:active{transform:scale(.9)}
-.pause-btn.visible{display:flex}
+.pause-btn.visible{opacity:1;visibility:visible}
 
 /* ══ SCREENS ══ */
 .screen{
@@ -774,7 +774,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .survival-wave{font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:900;color:#ff9500;text-shadow:0 0 10px #ff9500;letter-spacing:.06em}
 
 /* ══ MISSIONS ══ */
-.missions-btn{position:absolute;top:max(56px,env(safe-area-inset-top,56px));right:12px;display:none;pointer-events:auto;z-index:20}
+.missions-btn{display:none;pointer-events:auto;z-index:20}
 .missions-btn.visible{display:block}
 .missions-pip{
   width:40px;height:40px;border-radius:10px;
@@ -843,7 +843,10 @@ if('serviceWorker' in navigator){
     </div>
 
     <!-- Pause button — center between scores and level -->
-    <button class="pause-btn" id="pauseBtn">⏸</button>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+      <button class="pause-btn" id="pauseBtn">⏸</button>
+      <div class="missions-btn" id="missionsPip"><div class="missions-pip" id="missionsPipBtn">📋</div></div>
+    </div>
 
     <div class="right-col">
       <div class="xp-panel glass">
@@ -926,8 +929,6 @@ if('serviceWorker' in navigator){
 <div class="survival-hud" id="survivalHud"><div class="survival-wave" id="survivalWave">OLA 1</div></div>
 <!-- Last point slow-mo overlay -->
 <div class="lastpoint-overlay" id="lastPointOverlay"></div>
-<!-- Missions pip -->
-<div class="missions-btn" id="missionsPip"><div class="missions-pip" id="missionsPipBtn">📋</div></div>
 <!-- Missions modal -->
 <div class="missions-modal" id="missionsModal"><div class="missions-card" id="missionsList"></div></div>
 <!-- Settings modal -->
