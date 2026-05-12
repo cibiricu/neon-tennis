@@ -1,0 +1,18 @@
+{
+  "name": "Neon Tennis Rush",
+  "short_name": "NeonTennis",
+  "description": "Neon Tennis Rush - Arcade Game",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#02040a",
+  "theme_color": "#02040a",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
