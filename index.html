@@ -112,7 +112,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 /* ══ PAUSE BUTTON (in-game, bottom-right) ══ */
 .pause-btn{
   width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
+  display:none;align-items:center;justify-content:center;
   background:rgba(0,8,22,.82);
   border:1px solid rgba(255,255,255,.18);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -120,10 +120,10 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
   pointer-events:auto;touch-action:manipulation;
   transition:opacity .2s,transform .15s;
   box-shadow:0 4px 16px rgba(0,0,0,.4);
-  opacity:0;visibility:hidden;
+  flex-shrink:0;align-self:flex-start;
 }
 .pause-btn:active{transform:scale(.9)}
-.pause-btn.visible{opacity:1;visibility:visible}
+.pause-btn.visible{display:flex}
 
 /* ══ SCREENS ══ */
 .screen{
@@ -842,11 +842,8 @@ if('serviceWorker' in navigator){
       </div>
     </div>
 
-    <!-- Pause button — center between scores and level -->
-    <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
-      <button class="pause-btn" id="pauseBtn">⏸</button>
-      <div class="missions-btn" id="missionsPip"><div class="missions-pip" id="missionsPipBtn">📋</div></div>
-    </div>
+    <!-- Pause button -->
+    <button class="pause-btn" id="pauseBtn">⏸</button>
 
     <div class="right-col">
       <div class="xp-panel glass">
@@ -1038,6 +1035,9 @@ if('serviceWorker' in navigator){
       <button class="btn-sec" id="survivalBtn">💀 SUPERVIVENCIA</button>
       <button class="btn-sec" id="shopBtn">🛒 TIENDA</button>
       <button class="btn-sec" id="settingsBtn">⚙ CONFIG</button>
+    </div>
+    <div class="menu-row" style="margin-bottom:6px">
+      <button class="btn-sec" id="missionsMenuBtn">📋 MISIONES DEL DÍA</button>
     </div>
     <!-- Coins display -->
     <div class="coins-display" style="margin-top:2px;margin-bottom:6px" id="coinsDisplay">
@@ -5809,10 +5809,14 @@ function renderMissions(){
 }
 
 const missionsModal=document.getElementById('missionsModal');
-const missionsPip=document.getElementById('missionsPip');
-const missionsPipBtn=document.getElementById('missionsPipBtn');
-missionsPipBtn.addEventListener('click',()=>{renderMissions();missionsModal.classList.add('show')});
+// missionsPip no longer exists in HUD — missions now accessible from menu
+const missionsPip={classList:{add:()=>{},remove:()=>{},contains:()=>false}}; // stub so existing code doesn't break
+const missionsPipBtn={textContent:''}; // stub
 missionsModal.addEventListener('click',e=>{if(e.target===missionsModal)missionsModal.classList.remove('show')});
+
+// Wire menu missions button
+const missionsMenuBtn=document.getElementById('missionsMenuBtn');
+if(missionsMenuBtn) missionsMenuBtn.addEventListener('click',()=>{renderMissions();missionsModal.classList.add('show')});
 
 /* ═══════════════════════════════════════════
    SURVIVAL MODE
