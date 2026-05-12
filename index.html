@@ -147,43 +147,57 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
   position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;
   width:100%;max-width:420px;
-  padding:0 20px 20px;
-  height:100%;
+  padding:16px 20px 24px;
+  min-height:100%;
   justify-content:center;
   gap:0;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
+  box-sizing:border-box;
 }
 
 /* Logo area */
-.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:12px}
+.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
 .logo-ball-wrap{
-  width:80px;height:80px;margin-bottom:12px;
+  width:90px;height:90px;margin-bottom:10px;
   position:relative;
 }
 .logo-ball{
   width:100%;height:100%;border-radius:50%;
-  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.95),rgba(255,255,255,.04) 26%),
-             radial-gradient(circle at 50% 50%,#f4ff71,#a8d600 68%,#5f8200 100%);
-  box-shadow:0 0 0 2px rgba(255,255,255,.2),0 0 28px rgba(220,255,80,.6),0 0 70px rgba(200,255,50,.25),inset -12px -12px 24px rgba(0,0,0,.2);
+  background:
+    radial-gradient(circle at 30% 25%,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 22%),
+    radial-gradient(circle at 50% 50%,#eeff44,#a8d600 55%,#3d6600 100%);
+  box-shadow:
+    0 0 0 2px rgba(255,255,160,.5),
+    0 0 20px rgba(220,255,50,.9),
+    0 0 50px rgba(180,255,30,.7),
+    0 0 100px rgba(150,255,0,.4),
+    inset -10px -10px 20px rgba(0,0,0,.25);
   animation:logoBounce 2.2s ease-in-out infinite;
   position:relative;z-index:1;
 }
-.logo-ball::before,.logo-ball::after{content:'';position:absolute;inset:7px;border-radius:50%;border:2.5px solid rgba(255,255,255,.7);border-left-color:transparent;border-right-color:transparent}
+.logo-ball::before,.logo-ball::after{content:'';position:absolute;inset:6px;border-radius:50%;border:2.5px solid rgba(255,255,255,.8);border-left-color:transparent;border-right-color:transparent}
 .logo-ball::before{transform:rotate(26deg)}
 .logo-ball::after{transform:rotate(-26deg)}
 .logo-ring{
-  position:absolute;inset:-16px;border-radius:50%;
-  border:1px solid rgba(0,255,247,.25);
+  position:absolute;inset:-18px;border-radius:50%;
+  border:1.5px solid rgba(0,255,247,.5);
+  box-shadow:0 0 12px rgba(0,255,247,.3);
   animation:logoRingPulse 2.2s ease-in-out infinite;
 }
 .logo-ring2{
-  position:absolute;inset:-28px;border-radius:50%;
-  border:1px solid rgba(0,255,247,.1);
+  position:absolute;inset:-34px;border-radius:50%;
+  border:1px solid rgba(0,255,247,.25);
+  box-shadow:0 0 20px rgba(0,255,247,.15);
   animation:logoRingPulse 2.2s ease-in-out infinite .4s;
 }
-@keyframes logoBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-@keyframes logoRingPulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.9;transform:scale(1.05)}}
+.logo-ring3{
+  position:absolute;inset:-52px;border-radius:50%;
+  border:1px solid rgba(57,255,20,.15);
+  animation:logoRingPulse 2.2s ease-in-out infinite .8s;
+}
+@keyframes logoBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.04)}}
+@keyframes logoRingPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 
 .menu-title{
   font-family:'Orbitron','Courier New',monospace;
@@ -204,7 +218,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 
 /* Stats strip */
 .menu-stats{
-  display:flex;gap:8px;width:100%;margin-bottom:18px;
+  display:flex;gap:8px;width:100%;margin-bottom:10px;
 }
 .stat-box{
   flex:1;padding:9px 8px;border-radius:12px;text-align:center;
@@ -215,7 +229,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .stat-lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:3px}
 
 /* Difficulty */
-.menu-diff{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;margin-bottom:14px}
+.menu-diff{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;margin-bottom:10px}
 .diff-btn{
   padding:10px 0;border-radius:12px;
   font-family:'Orbitron','Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
@@ -977,47 +991,47 @@ if('serviceWorker' in navigator){
 
     <!-- Logo -->
     <div class="menu-logo">
-      <div class="logo-ball-wrap"><div class="logo-ball"></div><div class="logo-ring"></div><div class="logo-ring2"></div></div>
+      <div class="logo-ball-wrap"><div class="logo-ball"></div><div class="logo-ring"></div><div class="logo-ring2"></div><div class="logo-ring3"></div></div>
       <div class="menu-title">NEON TENNIS</div>
       <div class="menu-sub">RUSH EDITION · V4</div>
     </div>
 
     <!-- Stats -->
-    <div class="menu-stats">
+    <div class="menu-stats" style="margin-bottom:8px">
       <div class="stat-box"><div class="stat-val" id="menuLvl">1</div><div class="stat-lbl">NIVEL</div></div>
       <div class="stat-box"><div class="stat-val" id="menuBest">0</div><div class="stat-lbl">RÉCORD</div></div>
       <div class="stat-box"><div class="stat-val" id="menuSkin">👻</div><div class="stat-lbl">SKIN</div></div>
     </div>
 
     <!-- Mode: 2 columns -->
-    <div class="menu-diff" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+    <div class="menu-diff" style="grid-template-columns:1fr 1fr;margin-bottom:6px">
       <button class="mode-btn active" data-mode="1p" id="mode1p">👤 1P VS CPU</button>
       <button class="mode-btn" data-mode="2p" id="mode2p">👥 2P LOCAL</button>
     </div>
 
     <!-- Difficulty: 3 columns -->
-    <div class="menu-diff" id="diffRow">
+    <div class="menu-diff" id="diffRow" style="margin-bottom:8px">
       <button class="diff-btn" data-d="easy">🟢 FÁCIL</button>
       <button class="diff-btn active" data-d="medium">🟡 MEDIO</button>
       <button class="diff-btn" data-d="hard">🔴 DIFÍCIL</button>
     </div>
 
     <!-- Play -->
-    <button class="btn-mega" id="newBtn"><span style="font-size:20px">⚡</span> NUEVA PARTIDA</button>
+    <button class="btn-mega" id="newBtn" style="margin-bottom:8px"><span style="font-size:20px">⚡</span> NUEVA PARTIDA</button>
 
     <!-- 3 equal secondary buttons -->
-    <div class="menu-row">
+    <div class="menu-row" style="margin-bottom:6px">
       <button class="btn-sec" id="contBtn">▶ CONTINUAR</button>
       <button class="btn-sec" id="skinsToggle">🎨 SKINS</button>
       <button class="btn-sec" id="rankingBtn">🏆 RANKING</button>
     </div>
-    <div class="menu-row" style="margin-top:4px">
+    <div class="menu-row" style="margin-bottom:6px">
       <button class="btn-sec" id="survivalBtn">💀 SUPERVIVENCIA</button>
       <button class="btn-sec" id="shopBtn">🛒 TIENDA</button>
       <button class="btn-sec" id="settingsBtn">⚙ CONFIG</button>
     </div>
     <!-- Coins display -->
-    <div class="coins-display" style="margin-top:4px" id="coinsDisplay">
+    <div class="coins-display" style="margin-top:2px;margin-bottom:6px" id="coinsDisplay">
       <span class="coins-icon">🪙</span>
       <span class="coins-val" id="coinsVal">0</span>
     </div>
@@ -4624,67 +4638,66 @@ const input2p={active:false,pid:null,lastX:0,dxAccum:0};
 
 function scaleXFactor(){return W/court.w||1}
 
-/* ══ TOUCH INPUT — WebView compatible (touchstart/move/end are most reliable) ══ */
-
-// Touch state: track by touchIdentifier (not pointerId)
+/* ══ TOUCH INPUT — bulletproof for Android WebView ══ */
 let p1TouchId=null, p1LastX=0;
 let p2TouchId=null, p2LastX=0, p2dxAccum=0;
 
-function handleTouchStart(e){
-  if(STATE!=='play') return;
-  for(const t of e.changedTouches){
-    // Ignore touches on buttons/modals (let them handle their own events)
-    const tag = t.target && t.target.tagName;
-    if(tag==='BUTTON'||tag==='INPUT'||tag==='SELECT') continue;
-    const cl = t.target && t.target.className || '';
-    if(typeof cl==='string' && (cl.includes('btn')||cl.includes('modal')||cl.includes('shop'))) continue;
-
-    e.preventDefault();
-    const y=t.clientY, x=t.clientX;
-    if(twoPlayer && y < H*.5){
-      if(serving && serverWho==='cpu'){launchBall();break;}
-      if(p2TouchId===null){p2TouchId=t.identifier;p2LastX=x;p2dxAccum=0;}
-    } else {
-      if(serving && serverWho==='player'){launchBall();break;}
-      if(p1TouchId===null){p1TouchId=t.identifier;p1LastX=x;}
-    }
+function isUIElement(el){
+  let node=el;
+  for(let i=0;i<8;i++){
+    if(!node||node===document.body||node===document.documentElement)break;
+    const tag=(node.tagName||'').toUpperCase();
+    if(tag==='BUTTON'||tag==='INPUT'||tag==='SELECT'||tag==='A'||tag==='TEXTAREA')return true;
+    const id=node.id||'';
+    if(id==='itemBar'||id==='pauseBtn'||id==='pauseScr'||id==='resumeBtn'||id==='menuBtn')return true;
+    node=node.parentElement;
   }
+  return false;
 }
 
-function handleTouchMove(e){
-  if(STATE!=='play') return;
-  if(p1TouchId===null && p2TouchId===null) return;
+document.addEventListener('touchstart',function(e){
+  if(STATE!=='play')return;
+  // preventDefault here — before any filtering — so scroll never fires during play
   e.preventDefault();
-  for(const t of e.changedTouches){
+  for(let i=0;i<e.changedTouches.length;i++){
+    const t=e.changedTouches[i];
+    if(isUIElement(t.target))continue;
+    const x=t.clientX, y=t.clientY;
+    if(twoPlayer&&y<H*0.5){
+      if(serving&&serverWho==='cpu'){launchBall();}
+      else if(p2TouchId===null){p2TouchId=t.identifier;p2LastX=x;p2dxAccum=0;}
+    }else{
+      if(serving&&serverWho==='player'){launchBall();}
+      else if(p1TouchId===null){p1TouchId=t.identifier;p1LastX=x;}
+    }
+  }
+},{passive:false,capture:true});
+
+document.addEventListener('touchmove',function(e){
+  if(STATE!=='play')return;
+  e.preventDefault();
+  for(let i=0;i<e.changedTouches.length;i++){
+    const t=e.changedTouches[i];
     if(t.identifier===p1TouchId){
-      const dx=(t.clientX-p1LastX)*1.3;
-      player.x+=dx;
+      player.x+=(t.clientX-p1LastX)*1.4;
       p1LastX=t.clientX;
-    } else if(t.identifier===p2TouchId){
-      p2dxAccum+=(t.clientX-p2LastX)*1.3;
+    }else if(t.identifier===p2TouchId){
+      p2dxAccum+=(t.clientX-p2LastX)*1.4;
       p2LastX=t.clientX;
     }
   }
-}
+},{passive:false,capture:true});
 
-function handleTouchEnd(e){
-  for(const t of e.changedTouches){
-    if(t.identifier===p1TouchId) p1TouchId=null;
+document.addEventListener('touchend',function(e){
+  for(let i=0;i<e.changedTouches.length;i++){
+    const t=e.changedTouches[i];
+    if(t.identifier===p1TouchId)p1TouchId=null;
     if(t.identifier===p2TouchId){p2TouchId=null;p2dxAccum=0;}
   }
-}
+},{passive:true,capture:false});
 
-// Use document-level listeners so HUD overlay never blocks touch
-document.addEventListener('touchstart', handleTouchStart, {passive:false});
-document.addEventListener('touchmove',  handleTouchMove,  {passive:false});
-document.addEventListener('touchend',   handleTouchEnd,   {passive:false});
-document.addEventListener('touchcancel',handleTouchEnd,   {passive:false});
-
-// Keyboard serve fallback
-window.addEventListener('touchstart',e=>{
-  if(STATE!=='play'||e.target===canvas)return;
-  const tag=e.target&&e.target.tagName;
-  if(tag==='BUTTON'||tag==='INPUT')return;
+document.addEventListener('touchcancel',function(){
+  p1TouchId=null;p2TouchId=null;p2dxAccum=0;
 },{passive:true});
 
 // Keep old pointer/input variables wired for keyboard (desktop) use
