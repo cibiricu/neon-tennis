@@ -157,9 +157,9 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 }
 
 /* Logo area */
-.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
+.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:6px}
 .logo-ball-wrap{
-  width:90px;height:90px;margin-bottom:10px;
+  width:68px;height:68px;margin-bottom:6px;
   position:relative;
 }
 .logo-ball{
@@ -201,7 +201,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 
 .menu-title{
   font-family:'Orbitron','Courier New',monospace;
-  font-size:clamp(28px,7vw,42px);
+  font-size:clamp(22px,6vw,34px);
   font-weight:900;letter-spacing:.06em;line-height:.95;
   background:linear-gradient(135deg,#00fff7 0%,#39ff14 40%,#ffe600 70%,#00fff7 100%);
   background-size:300% 100%;
@@ -211,27 +211,27 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 }
 @keyframes titleFlow{0%{background-position:0%}100%{background-position:300%}}
 .menu-sub{
-  font-size:10px;letter-spacing:.28em;text-transform:uppercase;
-  color:rgba(0,255,247,.4);margin-top:6px;
+  font-size:9px;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(0,255,247,.4);margin-top:3px;
   font-family:'Orbitron','Courier New',monospace;
 }
 
 /* Stats strip */
 .menu-stats{
-  display:flex;gap:8px;width:100%;margin-bottom:10px;
+  display:flex;gap:6px;width:100%;margin-bottom:6px;
 }
 .stat-box{
-  flex:1;padding:9px 8px;border-radius:12px;text-align:center;
+  flex:1;padding:7px 6px;border-radius:12px;text-align:center;
   background:rgba(0,255,247,.04);border:1px solid rgba(0,255,247,.1);
   backdrop-filter:blur(12px);
 }
-.stat-val{font-family:'Orbitron','Courier New',monospace;font-size:18px;font-weight:900;color:#00fff7;line-height:1}
-.stat-lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:3px}
+.stat-val{font-family:'Orbitron','Courier New',monospace;font-size:16px;font-weight:900;color:#00fff7;line-height:1}
+.stat-lbl{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:2px}
 
 /* Difficulty */
-.menu-diff{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;margin-bottom:10px}
+.menu-diff{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;margin-bottom:6px}
 .diff-btn{
-  padding:10px 0;border-radius:12px;
+  padding:8px 0;border-radius:10px;
   font-family:'Orbitron','Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);
   color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;touch-action:manipulation;
@@ -240,13 +240,13 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 
 /* Main play button */
 .btn-mega{
-  width:100%;height:60px;border-radius:18px;
-  font-family:'Orbitron','Courier New',monospace;font-size:14px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+  width:100%;height:50px;border-radius:16px;
+  font-family:'Orbitron','Courier New',monospace;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
   border:1px solid rgba(0,255,247,.5);
   background:linear-gradient(135deg,rgba(0,255,247,.2) 0%,rgba(57,255,20,.12) 100%);
   color:#00fff7;cursor:pointer;touch-action:manipulation;
   box-shadow:0 0 30px rgba(0,255,247,.18),inset 0 1px 0 rgba(255,255,255,.1);
-  transition:all .2s;position:relative;overflow:hidden;margin-bottom:10px;
+  transition:all .2s;position:relative;overflow:hidden;margin-bottom:6px;
   display:flex;align-items:center;justify-content:center;gap:10px;
 }
 .btn-mega::before{
@@ -258,19 +258,19 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .btn-mega:active{transform:scale(.97)}
 
 /* Secondary buttons */
-.menu-row{display:flex;gap:8px;width:100%;margin-bottom:8px}
+.menu-row{display:flex;gap:6px;width:100%;margin-bottom:5px}
 .btn-sec{
-  flex:1;height:50px;border-radius:14px;
-  font-family:'Orbitron','Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  flex:1;height:42px;border-radius:12px;
+  font-family:'Orbitron','Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);
   color:rgba(255,255,255,.75);cursor:pointer;touch-action:manipulation;
-  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;
 }
 .btn-sec:active{transform:scale(.95)}
 
 /* Skin section */
 .mode-btn{
-  display:block;width:100%;padding:10px 0;border-radius:12px;
+  display:block;width:100%;padding:8px 0;border-radius:10px;
   font-family:'Orbitron','Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
   color:rgba(255,255,255,.55);cursor:pointer;transition:all .2s;touch-action:manipulation;
@@ -645,9 +645,9 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 
 
 /* ══ REWARDED ADS / MONETIZATION HOOKS ══ */
-.ad-rewards-row{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.ad-rewards-row{margin-top:4px;display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%}
 .reward-btn{
-  min-height:46px;border-radius:14px;
+  min-height:38px;border-radius:12px;
   font-family:'Orbitron','Courier New',monospace;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
   border:1px solid rgba(255,215,0,.35);background:linear-gradient(135deg,rgba(255,215,0,.16),rgba(0,255,247,.08));
   color:#ffd700;cursor:pointer;touch-action:manipulation;box-shadow:0 0 18px rgba(255,215,0,.1);
@@ -994,44 +994,45 @@ if('serviceWorker' in navigator){
     </div>
 
     <!-- Stats -->
-    <div class="menu-stats" style="margin-bottom:8px">
+    <div class="menu-stats" style="margin-bottom:6px">
       <div class="stat-box"><div class="stat-val" id="menuLvl">1</div><div class="stat-lbl">NIVEL</div></div>
       <div class="stat-box"><div class="stat-val" id="menuBest">0</div><div class="stat-lbl">RÉCORD</div></div>
       <div class="stat-box"><div class="stat-val" id="menuSkin">👻</div><div class="stat-lbl">SKIN</div></div>
     </div>
 
-    <!-- Mode: 2 columns -->
-    <div class="menu-diff" style="grid-template-columns:1fr 1fr;margin-bottom:6px">
+    <!-- Mode -->
+    <div class="menu-diff" style="grid-template-columns:1fr 1fr;margin-bottom:5px">
       <button class="mode-btn active" data-mode="1p" id="mode1p">👤 1P VS CPU</button>
       <button class="mode-btn" data-mode="2p" id="mode2p">👥 2P LOCAL</button>
     </div>
 
-    <!-- Difficulty: 3 columns -->
-    <div class="menu-diff" id="diffRow" style="margin-bottom:8px">
+    <!-- Difficulty -->
+    <div class="menu-diff" id="diffRow" style="margin-bottom:6px">
       <button class="diff-btn" data-d="easy">🟢 FÁCIL</button>
       <button class="diff-btn active" data-d="medium">🟡 MEDIO</button>
       <button class="diff-btn" data-d="hard">🔴 DIFÍCIL</button>
     </div>
 
     <!-- Play -->
-    <button class="btn-mega" id="newBtn" style="margin-bottom:8px"><span style="font-size:20px">⚡</span> NUEVA PARTIDA</button>
+    <button class="btn-mega" id="newBtn" style="margin-bottom:6px"><span style="font-size:18px">⚡</span> NUEVA PARTIDA</button>
 
-    <!-- 3 equal secondary buttons -->
-    <div class="menu-row" style="margin-bottom:6px">
+    <!-- Secondary buttons: 2 rows of 3 + misiones -->
+    <div class="menu-row" style="margin-bottom:5px">
       <button class="btn-sec" id="contBtn">▶ CONTINUAR</button>
       <button class="btn-sec" id="skinsToggle">🎨 SKINS</button>
       <button class="btn-sec" id="rankingBtn">🏆 RANKING</button>
     </div>
-    <div class="menu-row" style="margin-bottom:6px">
+    <div class="menu-row" style="margin-bottom:5px">
       <button class="btn-sec" id="survivalBtn">💀 SUPERVIVENCIA</button>
       <button class="btn-sec" id="shopBtn">🛒 TIENDA</button>
       <button class="btn-sec" id="settingsBtn">⚙ CONFIG</button>
     </div>
-    <div class="menu-row" style="margin-bottom:6px">
-      <button class="btn-sec" id="missionsMenuBtn">📋 MISIONES DEL DÍA</button>
+    <div class="menu-row" style="margin-bottom:5px">
+      <button class="btn-sec" id="missionsMenuBtn" style="flex:1;border-color:rgba(255,215,0,.35);color:#ffd700">📋 MISIONES DEL DÍA</button>
     </div>
-    <!-- Coins display -->
-    <div class="coins-display" style="margin-top:2px;margin-bottom:6px" id="coinsDisplay">
+
+    <!-- Coins -->
+    <div class="coins-display" style="margin-bottom:5px" id="coinsDisplay">
       <span class="coins-icon">🪙</span>
       <span class="coins-val" id="coinsVal">0</span>
     </div>
@@ -4618,7 +4619,6 @@ function startSession(){
   startEntryAnimation();
   initAudio();
   startRecording();
-  missionsPip.classList.add('visible');
   updateCoinsUI();
 }
 
@@ -4805,7 +4805,6 @@ function goToMenu(){
   pauseBtn.classList.remove('visible');
   livesBar.classList.remove('visible');
   survivalHudEl.classList.remove('visible');
-  missionsPip.classList.remove('visible');
   const itemBarEl=document.getElementById('itemBar');
   if(itemBarEl)itemBarEl.style.display='none';
   survivalMode=false;survivalWave=0;
@@ -5669,7 +5668,7 @@ function applyTranslation(){
   if(ql[4])ql[4].textContent=t('cfgLang');
   const stitle=document.querySelector('.settings-title');if(stitle)stitle.textContent=t('cfgTitle');
   // Missions button
-  const mp=document.getElementById('missionsPipBtn');if(mp)mp.textContent=t('missions');
+  // missions button text updated via missionsMenuBtn if needed
   // Pause buttons
   const rb=document.getElementById('resumeBtn');if(rb)rb.textContent=t('resume');
   const mb=document.getElementById('menuBtn');if(mb)mb.textContent=t('backMenu');
@@ -5800,14 +5799,9 @@ function renderMissions(){
 }
 
 const missionsModal=document.getElementById('missionsModal');
-// missionsPip no longer exists in HUD — missions now accessible from menu
-const missionsPip={classList:{add:()=>{},remove:()=>{},contains:()=>false}}; // stub so existing code doesn't break
-const missionsPipBtn={textContent:''}; // stub
 missionsModal.addEventListener('click',e=>{if(e.target===missionsModal)missionsModal.classList.remove('show')});
-
-// Wire menu missions button
 const missionsMenuBtn=document.getElementById('missionsMenuBtn');
-if(missionsMenuBtn) missionsMenuBtn.addEventListener('click',()=>{renderMissions();missionsModal.classList.add('show')});
+if(missionsMenuBtn)missionsMenuBtn.addEventListener('click',()=>{renderMissions();missionsModal.classList.add('show')});
 
 /* ═══════════════════════════════════════════
    SURVIVAL MODE
@@ -5926,9 +5920,7 @@ function startEntryAnimation(){
   setTimeout(()=>{
     entryAnimating=false;
     if(STATE==='entry')STATE='play';
-    // Show missions pip after entry
-    missionsPip.classList.add('visible');
-  },1200);
+      },1200);
 }
 
 function drawEntryAnim(){
