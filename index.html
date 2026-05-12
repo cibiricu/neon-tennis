@@ -16,11 +16,9 @@
 </style>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#02040a;font-family:'Exo 2','Segoe UI',system-ui,sans-serif;color:#fff;touch-action:none;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#02040a;font-family:'Exo 2','Segoe UI',system-ui,sans-serif;color:#fff;touch-action:none}
 #app{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch-action:none}
-#app{position:relative;width:100vw;height:100vh;overflow:hidden}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch-action:none;pointer-events:auto;z-index:0}
 
 /* ══ HUD ══ */
 .hud{position:absolute;inset:0;pointer-events:none;z-index:10}
@@ -149,14 +147,16 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;
   position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;
   width:100%;max-width:420px;
-  padding:env(safe-area-inset-top,0px) 20px 20px;
-  height:100%;justify-content:flex-start;gap:0;
-  overflow-y:auto;padding-top:max(env(safe-area-inset-top,0px),12px);
+  padding:0 20px 20px;
+  height:100%;
+  justify-content:center;
+  gap:0;
+  overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
 
 /* Logo area */
-.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:20px}
+.menu-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:12px}
 .logo-ball-wrap{
   width:80px;height:80px;margin-bottom:12px;
   position:relative;
