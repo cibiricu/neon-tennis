@@ -774,17 +774,8 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .survival-wave{font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:900;color:#ff9500;text-shadow:0 0 10px #ff9500;letter-spacing:.06em}
 
 /* ══ MISSIONS ══ */
-.missions-btn{display:none;pointer-events:auto;z-index:20}
-.missions-btn.visible{display:block}
-.missions-pip{
-  width:40px;height:40px;border-radius:10px;
-  background:rgba(0,8,22,.82);border:1px solid rgba(255,215,0,.35);
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;cursor:pointer;
-  box-shadow:0 4px 16px rgba(0,0,0,.4);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  touch-action:manipulation;
-}
+/* missions-btn CSS removed — button now in main menu only */
+/* missions-pip CSS removed */
 .missions-modal{position:absolute;inset:0;z-index:55;display:flex;align-items:flex-end;padding:16px;pointer-events:none;opacity:0;transition:opacity .25s ease;background:rgba(2,0,8,.0)}
 .missions-modal.show{opacity:1;pointer-events:auto;background:rgba(2,0,8,.7)}
 .missions-card{width:100%;max-width:420px;margin:0 auto;border-radius:22px;background:linear-gradient(160deg,rgba(8,16,40,.99),rgba(4,9,22,.97));border:1px solid rgba(255,215,0,.18);padding:16px;display:flex;flex-direction:column;gap:10px;max-height:65vh;overflow-y:auto}
