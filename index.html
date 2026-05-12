@@ -797,25 +797,8 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 </style>
 <link rel="manifest" href="manifest.json"/>
 <script>
-// Inline manifest fallback for PWABuilder detection
-const _manifest={
-  "name":"Neon Tennis Rush",
-  "short_name":"NeonTennis",
-  "description":"Neon Tennis Rush Arcade Game",
-  "start_url":"index.html",
-  "display":"fullscreen",
-  "orientation":"portrait",
-  "background_color":"#02040a",
-  "theme_color":"#02040a",
-  "icons":[{"src":"icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
-};
-const _blob=new Blob([JSON.stringify(_manifest)],{type:'application/manifest+json'});
-document.querySelector('link[rel="manifest"]').href=URL.createObjectURL(_blob);
-// Register service worker inline
 if('serviceWorker' in navigator){
-  const _sw=`const C='nt1';self.addEventListener('install',e=>{self.skipWaiting()});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))})`;
-  const _swBlob=new Blob([_sw],{type:'text/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(_swBlob)).catch(()=>{});
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>
 <link rel="icon" href="icon.png" type="image/png"/>
