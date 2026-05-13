@@ -708,14 +708,6 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .shop-item.owned{border-color:rgba(57,255,20,.35);background:rgba(57,255,20,.06)}
 .shop-item.active-item{border-color:rgba(0,255,247,.5);background:rgba(0,255,247,.1);box-shadow:0 0 20px rgba(0,255,247,.15)}
 .shop-item.cant-afford{opacity:.45;cursor:default}
-.shop-item.watch-ad{opacity:1!important;cursor:pointer}
-.shop-item-ad-btn{
-  margin-top:4px;width:100%;padding:5px 0;border-radius:8px;
-  font-family:'Orbitron','Courier New',monospace;font-size:8px;font-weight:900;letter-spacing:.06em;
-  border:1px solid rgba(255,215,0,.5);background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,149,0,.08));
-  color:#ffd700;cursor:pointer;touch-action:manipulation;
-  box-shadow:0 0 10px rgba(255,215,0,.15);
-}
 .perm-toggle{
   margin-top:5px;width:100%;padding:5px 0;border-radius:8px;
   font-family:'Orbitron','Courier New',monospace;font-size:8px;font-weight:900;letter-spacing:.08em;
@@ -769,9 +761,34 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 .lang-btn.active{border-color:rgba(0,255,247,.45);background:rgba(0,255,247,.12);color:#00fff7}
 
 /* ══ SURVIVAL MODE ══ */
-.survival-hud{position:absolute;top:max(82px,env(safe-area-inset-top,82px));right:12px;display:none;align-items:center;gap:6px;pointer-events:none;z-index:20}
+.survival-hud{position:absolute;top:max(82px,env(safe-area-inset-top,82px));right:10px;display:none;flex-direction:column;align-items:center;gap:2px;pointer-events:none;z-index:20}
 .survival-hud.visible{display:flex}
-.survival-wave{font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:900;color:#ff9500;text-shadow:0 0 10px #ff9500;letter-spacing:.06em}
+.survival-skull{
+  font-size:22px;line-height:1;
+  filter:drop-shadow(0 0 6px #ff9500) drop-shadow(0 0 14px #ff6600);
+  transition:transform .15s;
+}
+.survival-skull.wave-up{animation:skullPop .6s cubic-bezier(.175,.885,.32,1.275) forwards}
+.survival-wave{
+  font-family:'Orbitron','Courier New',monospace;
+  font-size:13px;font-weight:900;
+  color:#ff9500;
+  text-shadow:0 0 12px #ff9500,0 0 28px #ff660088;
+  letter-spacing:.06em;
+  line-height:1;
+}
+.survival-wave-sub{
+  font-family:'Orbitron','Courier New',monospace;
+  font-size:8px;font-weight:700;letter-spacing:.1em;
+  color:rgba(255,149,0,.5);line-height:1;
+}
+@keyframes skullPop{
+  0%{transform:scale(1)}
+  25%{transform:scale(1.7) rotate(-15deg)}
+  50%{transform:scale(1.4) rotate(10deg)}
+  75%{transform:scale(1.6) rotate(-5deg)}
+  100%{transform:scale(1) rotate(0deg)}
+}
 
 
 /* ══ COINS ══ */
@@ -861,8 +878,8 @@ if('serviceWorker' in navigator){
       </div>
     </div>
     <div class="go-ad-actions">
-      <button class="go-btn-ad" id="reviveAdBtn">🎥 REVIVIR CON 3 VIDAS</button>
-      <button class="go-btn-ad" id="doubleCoinsAdBtn">🎥 DOBLAR MONEDAS</button>
+      <button class="go-btn-ad" id="reviveAdBtn">💚 REVIVIR CON 3 VIDAS</button>
+      <button class="go-btn-ad" id="doubleCoinsAdBtn">💰 DOBLAR MONEDAS</button>
     </div>
     <button class="go-btn" id="goRetryBtn" style="display:none;border-color:rgba(255,149,0,.5);background:linear-gradient(135deg,rgba(255,149,0,.2),rgba(255,149,0,.08));color:#ff9500;box-shadow:0 0 24px rgba(255,149,0,.2)">💀 REINTENTAR</button>
     <button class="go-btn" id="goMenuBtn">↩ VOLVER AL MENÚ</button>
@@ -899,7 +916,11 @@ if('serviceWorker' in navigator){
 <!-- Screen transition fade -->
 <div class="screen-fade" id="screenFade"></div>
 <!-- Survival wave HUD -->
-<div class="survival-hud" id="survivalHud"><div class="survival-wave" id="survivalWave">OLA 1</div></div>
+<div class="survival-hud" id="survivalHud">
+  <div class="survival-skull" id="survivalSkull">💀</div>
+  <div class="survival-wave" id="survivalWave">1</div>
+  <div class="survival-wave-sub">OLA</div>
+</div>
 <!-- Last point slow-mo overlay -->
 <div class="lastpoint-overlay" id="lastPointOverlay"></div>
 <!-- Settings modal -->
@@ -980,7 +1001,6 @@ if('serviceWorker' in navigator){
     <div class="menu-stats" style="margin-bottom:6px">
       <div class="stat-box"><div class="stat-val" id="menuLvl">1</div><div class="stat-lbl">NIVEL</div></div>
       <div class="stat-box"><div class="stat-val" id="menuBest">0</div><div class="stat-lbl">RÉCORD</div></div>
-      <div class="stat-box"><div class="stat-val" id="menuSkin">👻</div><div class="stat-lbl">SKIN</div></div>
     </div>
 
     <!-- Mode -->
@@ -1002,7 +1022,7 @@ if('serviceWorker' in navigator){
     <!-- Secondary buttons -->
     <div class="menu-row" style="margin-bottom:5px">
       <button class="btn-sec" id="contBtn">▶ CONTINUAR</button>
-      <button class="btn-sec" id="skinsToggle">🎨 SKINS</button>
+      <button class="btn-sec" id="skinsToggle">SKINS</button>
       <button class="btn-sec" id="rankingBtn">🏆 RANKING</button>
     </div>
     <div class="menu-row" style="margin-bottom:5px">
@@ -1017,9 +1037,9 @@ if('serviceWorker' in navigator){
       <span class="coins-val" id="coinsVal">0</span>
     </div>
     <div class="ad-rewards-row">
-      <button class="reward-btn" id="freeCoinsAdBtn">🎥 +50 MONEDAS</button>
-      <button class="reward-btn" id="freeHeartAdBtn">🎥 +1 VIDA</button>
-      <button class="reward-btn booster" id="boosterPackAdBtn" style="grid-column:1/-1">🎥 PACK NEÓN GRATIS</button>
+      <button class="reward-btn" id="freeCoinsAdBtn">🪙 +50 MONEDAS</button>
+      <button class="reward-btn" id="freeHeartAdBtn">❤️ +1 VIDA</button>
+      <button class="reward-btn booster" id="boosterPackAdBtn" style="grid-column:1/-1">🎁 PACK NEÓN GRATIS</button>
     </div>
 
     <!-- Skin collection -->
@@ -1501,19 +1521,19 @@ function updateHUD(){
   // Menu stats
   const mLvl=document.getElementById('menuLvl');
   const mBest=document.getElementById('menuBest');
-  const mSkin=document.getElementById('menuSkin');
   if(mLvl)mLvl.textContent=lvl;
   if(mBest)mBest.textContent=best;
-  if(mSkin)mSkin.textContent=curSkin().icon;
+  const sk=document.getElementById('skinsToggle');
+  if(sk)sk.innerHTML=`<span style="font-size:18px;vertical-align:middle">${curSkin().icon}</span> SKINS`;
 }
 
 function contLabel(){
   const mLvl=document.getElementById('menuLvl');
   const mBest=document.getElementById('menuBest');
-  const mSkin=document.getElementById('menuSkin');
   if(mLvl)mLvl.textContent=getLevelFromXP(xpTotal).lvl;
   if(mBest)mBest.textContent=best;
-  if(mSkin)mSkin.textContent=curSkin().icon;
+  const sk=document.getElementById('skinsToggle');
+  if(sk)sk.innerHTML=`<span style="font-size:18px;vertical-align:middle">${curSkin().icon}</span> SKINS`;
   if(xpTotal===0&&best===0){
     contBtn.textContent='SIN DATOS';contBtn.style.opacity='.38';
   }else{
@@ -1546,7 +1566,12 @@ function buildSkins(){
       ${reqHtml}
     `;
     if(unlocked){
-      const selectSkin=e=>{e.stopPropagation();e.preventDefault();selectedSkin=i;save();buildSkins()};
+      const selectSkin=e=>{
+        e.stopPropagation();e.preventDefault();
+        selectedSkin=i;save();buildSkins();
+        const sk=document.getElementById('skinsToggle');
+        if(sk)sk.innerHTML=`<span style="font-size:18px;vertical-align:middle">${curSkin().icon}</span> SKINS`;
+      };
       card.addEventListener('click',selectSkin);
       card.addEventListener('touchend',selectSkin,{passive:false});
     }
@@ -2306,6 +2331,12 @@ function activateBombPower(){
 /* ─────────── LIVES ─────────── */
 function initLives(){
   maxLives={easy:10,medium:5,hard:3}[diff]||5;
+  try{
+    if(localStorage.getItem('ntr4_bonusLife_'+diff)==='1'){
+      maxLives+=1;
+      localStorage.removeItem('ntr4_bonusLife_'+diff);
+    }
+  }catch(e){}
   playerLives=maxLives;
   gameoverActive=false;
   renderLives();
@@ -2344,9 +2375,10 @@ let coins=0;
 let sessionCoinsEarned=0;
 let gameOverReviveUsed=false;
 let gameOverDoubleUsed=false;
-let boosterUsedThisSession=false;
-let heartCdInterval=null;
-let coinCdInterval=null;
+let boosterUsedThisSession=false; // kept for compatibility
+let _cdTick=null;
+const CD4H=4*60*60*1000;
+const CD6M=6*60*1000;
 
 /* ═══ SURVIVAL MODE ═══ */
 let survivalMode=false;
@@ -2462,9 +2494,9 @@ function triggerGameOver(){
     if(goSub) goSub.textContent='Sin vidas restantes';
     if(goRetryBtn) goRetryBtn.style.display='none';
     if(reviveAdBtn) reviveAdBtn.style.display='';
-    if(reviveAdBtn){reviveAdBtn.textContent=gameOverReviveUsed?'✓ REVIVE USADO':'🎥 REVIVIR CON 3 VIDAS';reviveAdBtn.classList.toggle('used',gameOverReviveUsed)}
   }
-  if(doubleCoinsAdBtn){doubleCoinsAdBtn.textContent=sessionCoinsEarned>0?`🎥 DOBLAR ${sessionCoinsEarned} MONEDAS`:'🎥 DOBLAR MONEDAS';doubleCoinsAdBtn.classList.toggle('used',gameOverDoubleUsed||sessionCoinsEarned<=0)}
+  updateReviveBtn();
+  updateDoubleCoinsBtn();
   doShake(30,.8);
   burst(W/2,H/2,'#ff2255',80,600);
   for(let i=0;i<5;i++) setTimeout(()=>{
@@ -4615,7 +4647,17 @@ function isUIElement(el){
 
 document.addEventListener('touchstart',function(e){
   if(STATE!=='play')return;
-  // preventDefault here — before any filtering — so scroll never fires during play
+
+  // IMPORTANT: do not call preventDefault() when the touch starts on UI buttons
+  // like PAUSE. Android WebView can cancel the button click if we preventDefault
+  // too early at document-capture level. Only block default behaviour for
+  // real gameplay touches on the canvas.
+  let hasGameplayTouch=false;
+  for(let i=0;i<e.changedTouches.length;i++){
+    if(!isUIElement(e.changedTouches[i].target)){hasGameplayTouch=true;break;}
+  }
+  if(!hasGameplayTouch)return;
+
   e.preventDefault();
   for(let i=0;i<e.changedTouches.length;i++){
     const t=e.changedTouches[i];
@@ -4726,6 +4768,7 @@ if(boosterPackAdBtn)boosterPackAdBtn.addEventListener('click',rewardBoosterPack)
 updateCoinBtns();
 updateHeartBtn();
 updateBoosterBtn();
+startCdTick();
 if(reviveAdBtn)reviveAdBtn.addEventListener('click',rewardRevive);
 if(doubleCoinsAdBtn)doubleCoinsAdBtn.addEventListener('click',rewardDoubleGameCoins);
 
@@ -4748,11 +4791,16 @@ skinsToggle.addEventListener('click',()=>{
 skinScroll.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
 
 resumeBtn.addEventListener('click',resumeGame);
+
+function handlePauseButton(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  if(STATE==='play')pauseGame();
+  else if(STATE==='pause')resumeGame();
+}
+
 pauseBtn.addEventListener('pointerdown',e=>e.stopPropagation());
-pauseBtn.addEventListener('click',e=>{
-  e.stopPropagation();
-  STATE==='play'?pauseGame():resumeGame();
-});
+pauseBtn.addEventListener('pointerup',handlePauseButton);
+pauseBtn.addEventListener('click',handlePauseButton);
 
 function goToMenu(){
   stopWinFireworks();
@@ -4769,6 +4817,14 @@ function goToMenu(){
   stopRecording();
   if(gameoverActive){xpTotal=0;lvl=1;save()}
   gameoverActive=false;
+
+  // Only remove permanents that were ACTIVE this game
+  // Inactive (bought but not enabled) carry over to next game
+  activeItems.forEach(id=>ownedItems.delete(id));
+  activeItems.clear();
+  applyPermBoost();
+  saveShopData();
+
   STATE='menu';contLabel();updateCoinsUI();
 }
 
@@ -4780,6 +4836,7 @@ if(goRetryBtn) goRetryBtn.addEventListener('click',()=>{
   g.ps=0;g.cs=0;combo=0;
   survivalMode=true;twoPlayer=false;
   survivalWave=0;survivalCpuBoost=1;
+  activeItems.forEach(id=>ownedItems.delete(id));activeItems.clear();applyPermBoost();saveShopData();
   screenTransition(()=>startSession());
 });
 
@@ -4966,31 +5023,24 @@ function addCoins(n,x,y,source='game'){
 }
 
 /* ═══════════════════════════════════════════
-   REWARDED ADS — generic Android/WebView hook
-   In browser this simulates a completed ad.
-   In Android, expose one of these hooks from your wrapper:
-   window.showRewardedAd(reason, onSuccessName) OR
-   window.AndroidRewardedAd.show(reason)
-═══════════════════════════════════════════ */
+/* ── COOLDOWN REWARD SYSTEM (4h, no ads) ── */
+const REWARD_CD = 4*60*60*1000; // 4 hours
+function rewardCdRemaining(key){
+  try{const last=+localStorage.getItem('ntr4_cd_'+key)||0;return Math.max(0,REWARD_CD-(Date.now()-last))}catch(e){return 0}
+}
+function rewardCdSave(key){
+  try{localStorage.setItem('ntr4_cd_'+key,Date.now())}catch(e){}
+}
+function rewardCdLabel(key){
+  const rem=rewardCdRemaining(key);
+  if(rem<=0)return null;
+  const h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000),s=Math.floor((rem%60000)/1000);
+  return h>0?`${h}h ${m.toString().padStart(2,'0')}m`:`${m}:${s.toString().padStart(2,'0')}`;
+}
+
 function requestRewardedAd(reason,onReward){
-  toast('🎬 CARGANDO VÍDEO...','#ffd700');
-  try{
-    // Promise-based hook: window.showRewardedAd('coins').then(()=>...)
-    if(typeof window.showRewardedAd==='function'){
-      const r=window.showRewardedAd(reason);
-      if(r&&typeof r.then==='function')return r.then(()=>onReward&&onReward()).catch(()=>toast('Anuncio no completado','#ff2255'));
-      if(r===true){onReward&&onReward();return}
-    }
-    // Callback hook for WebView wrappers.
-    if(window.AndroidRewardedAd&&typeof window.AndroidRewardedAd.show==='function'){
-      const cb='__ntrReward_'+Date.now()+Math.floor(Math.random()*9999);
-      window[cb]=()=>{try{onReward&&onReward()}finally{delete window[cb]}};
-      window.AndroidRewardedAd.show(reason,cb);
-      return;
-    }
-  }catch(e){console.warn('Rewarded ad hook error',e)}
-  // Browser / development fallback.
-  setTimeout(()=>{toast('🎬 VÍDEO COMPLETADO','#39ff14');onReward&&onReward()},650);
+  // No ads — just execute reward immediately
+  onReward&&onReward();
 }
 
 
@@ -5245,7 +5295,7 @@ function rewardAnim(type){
   const CONFIGS={
     coins:     {emoji:'🪙',title:'+50 MONEDAS',  sub:'RECOMPENSA DIARIA',           c1:'#ffd700',c2:'#ffaa00',c3:'#fffacd',flash:'rgba(255,215,0,.22)',  bg:'rgba(180,130,0,.14)'},
     heart:     {emoji:'❤️', title:'+1 VIDA',      sub:'VIDA EXTRA GANADA',           c1:'#ff2255',c2:'#ff88aa',c3:'#ffccdd',flash:'rgba(255,34,85,.2)',   bg:'rgba(180,0,40,.14)'},
-    booster:   {emoji:'🎁', title:'PACK NEÓN',    sub:'🛡️ ESCUDO · ⚡ BOOST · 🧲 IMÁN',c1:'#00fff7',c2:'#39ff14',c3:'#ffd700',flash:'rgba(0,255,247,.18)', bg:'rgba(0,120,120,.12)'},
+    booster:   {emoji:'🎁', title:'PACK NEÓN',    sub:'🛡️ ESCUDO · 💫 TRIPLE · 🧲 IMÁN',c1:'#00fff7',c2:'#39ff14',c3:'#ffd700',flash:'rgba(0,255,247,.18)', bg:'rgba(0,120,120,.12)'},
     revive:    {emoji:'💚', title:'¡REVIVIDO!',   sub:'3 VIDAS RESTAURADAS',         c1:'#39ff14',c2:'#00fff7',c3:'#ffffff',flash:'rgba(57,255,20,.25)',  bg:'rgba(0,120,0,.14)'},
     doublecoins:{emoji:'💰',title:'MONEDAS ×2',   sub:'BONIFICACIÓN APLICADA',       c1:'#ffd700',c2:'#ff9500',c3:'#ffcc00',flash:'rgba(255,215,0,.28)', bg:'rgba(180,100,0,.14)'}
   };
@@ -5369,189 +5419,152 @@ function rewardAnim(type){
   window._rwAutoTimer=setTimeout(_dismiss,7000);
 }
 
-/* ── FREE COINS: 1 use per 12h ── */
-const COIN_CD_MS=12*60*60*1000;
-const COIN_SK='ntr4_lastCoin';
-function coinCdRemaining(){try{const last=+localStorage.getItem(COIN_SK)||0;return Math.max(0,COIN_CD_MS-(Date.now()-last))}catch(e){return 0}}
-function coinBtnLabel(){
-  const rem=coinCdRemaining();
-  if(rem>0){const tot=Math.ceil(rem/1000),h=Math.floor(tot/3600),m=Math.floor((tot%3600)/60),s=tot%60;
-    return h>0?`⏳ ${h}h${m.toString().padStart(2,'0')}m`:`⏳ ${m}:${s.toString().padStart(2,'0')}`}
-  return'🎥 +50 MONEDAS';
+/* ══ REWARD SYSTEM — 4h cooldown, no ads ══ */
+function cdRemaining(key){ 
+  const dur = key==='doublecoins' ? CD6M : CD4H;
+  try{return Math.max(0,dur-(Date.now()-(+localStorage.getItem('ntr4_cd_'+key)||0)))}catch(e){return 0}
 }
+function cdSave(key){ try{localStorage.setItem('ntr4_cd_'+key,Date.now())}catch(e){} }
+function cdLabel(rem){
+  if(rem<=0)return null;
+  const h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000),s=Math.floor((rem%60000)/1000);
+  return h>0?`${h}h ${m.toString().padStart(2,'0')}m`:`${m}:${s.toString().padStart(2,'0')}`;
+}
+function applyBtnCd(btn,ready,readyText,key){
+  if(!btn)return;
+  const rem=cdRemaining(key);
+  const dis=!ready||rem>0;
+  btn.disabled=dis;
+  btn.style.opacity=dis?'0.4':'';
+  btn.style.pointerEvents=dis?'none':'';
+  btn.textContent=rem>0?`⏳ ${cdLabel(rem)}`:readyText;
+}
+function startCdTick(){
+  if(_cdTick)return;
+  _cdTick=setInterval(()=>{
+    updateCoinBtns();updateHeartBtn();updateBoosterBtn();
+    updateReviveBtn();updateDoubleCoinsBtn();
+    if(STATE==='play'||STATE==='point') renderItemBar();
+    const shopEl=document.getElementById('shopItems');
+    if(shopEl&&shopEl.children.length>0) renderShop();
+  },1000);
+}
+
+/* +50 MONEDAS */
 function updateCoinBtns(){
-  const label=coinBtnLabel(),rem=coinCdRemaining(),dis=rem>0;
+  const rem=cdRemaining('coins');
+  const label=rem>0?`⏳ ${cdLabel(rem)}`:'🪙 +50 MONEDAS';
+  const dis=rem>0;
   [freeCoinsAdBtn,document.getElementById('shopCoinsAdBtn')].forEach(b=>{
     if(!b)return;
     b.textContent=label;b.disabled=dis;
     b.style.opacity=dis?'0.4':'';b.style.pointerEvents=dis?'none':'';
   });
-  if(dis&&!coinCdInterval){
-    coinCdInterval=setInterval(()=>{if(coinCdRemaining()<=0){clearInterval(coinCdInterval);coinCdInterval=null}updateCoinBtns()},1000);
-  }else if(!dis&&coinCdInterval){clearInterval(coinCdInterval);coinCdInterval=null}
 }
 function rewardFreeCoins(amount=50){
-  const rem=coinCdRemaining();
-  if(rem>0){toast('Vuelve en '+coinBtnLabel().replace('⏳ ',''),'#ff2255');return}
-  requestRewardedAd('free_coins',()=>{
-    rewardAnim('coins');
-    try{localStorage.setItem(COIN_SK,Date.now())}catch(e){}
-    addCoins(amount,W/2,H*.55,'ad');
-    burst(W/2,H*.48,'#ffd700',40,420);
-    burstRing(W/2,H*.48,'#ffd700');
-    burstRing(W/2,H*.48,'#ffaa00');
-    for(let i=0;i<4;i++) spawnLightning(W/2,H*.48,W/2+rnd(-180,180),H*.48+rnd(-120,120),'#ffd700',6);
-    doShake(8,.18);bgPulse=.7;bgPulseColor='#ffd700';
-    toast(`🎥 +${amount} MONEDAS`,'#ffd700');
-    playFx('powerup');vibrate([30,20,70]);
-    updateCoinBtns();renderShop();
-  });
+  if(cdRemaining('coins')>0){toast(`⏳ Disponible en ${cdLabel(cdRemaining('coins'))}`,'#ff2255');return}
+  cdSave('coins');
+  rewardAnim('coins');
+  addCoins(amount,W/2,H*.55,'free');
+  toast(`🪙 +${amount} MONEDAS`,'#ffd700');
+  playFx('powerup');vibrate([30,20,70]);
+  updateCoinBtns();renderShop();
 }
 
-/* ── FREE HEART: 5-min cooldown, persists across sessions ── */
-const HEART_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
-
-function heartCdRemaining(){
-  try{
-    const last = +localStorage.getItem('ntr4_lastHeart') || 0;
-    return Math.max(0, HEART_COOLDOWN_MS - (Date.now() - last));
-  }catch(e){return 0}
-}
-
+/* +1 VIDA */
 function updateHeartBtn(){
-  if(!freeHeartAdBtn) return;
-  const rem = heartCdRemaining();
-  if(rem > 0){
-    const secs = Math.ceil(rem / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    freeHeartAdBtn.textContent = `❤️ ${m}:${s.toString().padStart(2,'0')}`;
-    freeHeartAdBtn.disabled = true;
-    freeHeartAdBtn.style.opacity = '0.4';
-    freeHeartAdBtn.style.pointerEvents = 'none';
-    if(!heartCdInterval){
-      heartCdInterval = setInterval(()=>{
-        if(heartCdRemaining() <= 0){
-          clearInterval(heartCdInterval); heartCdInterval = null;
-          freeHeartAdBtn.textContent = '🎥 +1 VIDA';
-          freeHeartAdBtn.disabled = false;
-          freeHeartAdBtn.style.opacity = '';
-          freeHeartAdBtn.style.pointerEvents = '';
-        } else {
-          updateHeartBtn();
-        }
-      }, 1000);
-    }
-  } else {
-    freeHeartAdBtn.textContent = '🎥 +1 VIDA';
-    freeHeartAdBtn.disabled = false;
-    freeHeartAdBtn.style.opacity = '';
-    freeHeartAdBtn.style.pointerEvents = '';
-  }
+  applyBtnCd(freeHeartAdBtn,true,'❤️ +1 VIDA','heart');
 }
-
 function rewardFreeHeart(){
-  if(heartCdRemaining() > 0){ updateHeartBtn(); return; }
-  requestRewardedAd('free_heart',()=>{
-    rewardAnim('heart');
-    try{ localStorage.setItem('ntr4_lastHeart', Date.now()); }catch(e){}
-    if(STATE==='play'&&!twoPlayer&&!survivalMode){
-      playerLives=Math.min(playerLives+1,(maxLives||10)+3);renderLives();
-      burstRing(player.x,player.y,'#ff2255');
-      burstRing(player.x,player.y,'#ff88aa');
-      burst(player.x,player.y,'#ff2255',30,360);
-      doShake(7,.15);bgPulse=.6;bgPulseColor='#ff2255';
-      toast('🎥 ❤️ +1 VIDA AÑADIDA','#ff2255');
-    }else{
-      addConsumable('extralife');saveShopData();renderItemBar();
-      burst(W/2,H*.48,'#ff2255',30,360);
-      burstRing(W/2,H*.48,'#ff2255');
-      doShake(6,.12);bgPulse=.5;bgPulseColor='#ff2255';
-      toast('🎥 ❤️ +VIDA GUARDADA','#ff2255');
-    }
-    playFx('powerup');vibrate([40,20,80]);
-    updateHeartBtn();
-  });
-}
-
-/* ── BOOSTER PACK: once per game session ── */
-function updateBoosterBtn(){
-  if(!boosterPackAdBtn) return;
-  if(boosterUsedThisSession){
-    boosterPackAdBtn.textContent = '✓ PACK RECLAMADO (próxima partida)';
-    boosterPackAdBtn.disabled = true;
-    boosterPackAdBtn.style.opacity = '0.4';
-    boosterPackAdBtn.style.pointerEvents = 'none';
-  } else {
-    boosterPackAdBtn.textContent = '🎥 PACK NEÓN GRATIS';
-    boosterPackAdBtn.disabled = false;
-    boosterPackAdBtn.style.opacity = '';
-    boosterPackAdBtn.style.pointerEvents = '';
+  if(cdRemaining('heart')>0){toast(`⏳ Disponible en ${cdLabel(cdRemaining('heart'))}`,'#ff2255');return}
+  cdSave('heart');
+  rewardAnim('heart');
+  if(STATE==='play'&&!twoPlayer&&!survivalMode){
+    // In-game: add 1 life now
+    playerLives=Math.min(playerLives+1,(maxLives||10)+3);renderLives();
+    toast('❤️ +1 VIDA AÑADIDA','#ff2255');
+  }else{
+    // From menu: +1 to next game in current difficulty (not cumulative)
+    try{localStorage.setItem('ntr4_bonusLife_'+diff,'1')}catch(e){}
+    const diffName={easy:'FÁCIL',medium:'MEDIO',hard:'DIFÍCIL'}[diff]||diff.toUpperCase();
+    toast(`❤️ +1 VIDA PARA ${diffName}`,'#ff2255');
   }
+  playFx('powerup');vibrate([40,20,80]);
+  updateHeartBtn();
 }
 
+/* PACK NEÓN */
+function updateBoosterBtn(){
+  applyBtnCd(boosterPackAdBtn,true,'🎁 PACK NEÓN GRATIS','booster');
+}
 function rewardBoosterPack(){
-  if(boosterUsedThisSession){ toast('Ya reclamado — disponible en la próxima partida','#ff2255'); return; }
-  requestRewardedAd('neon_booster_pack',()=>{
-    rewardAnim('booster');
-    boosterUsedThisSession = true;
-    addConsumable('shield');
-    addConsumable('speedboost');
-    addConsumable('ballmagnet');
-    saveShopData();
-    renderItemBar();
-    renderShop();
-    toast('🎥 PACK NEÓN: 🛡️ + ⚡ + 🧲','#00fff7');
-    burst(W/2,H*.55,'#00fff7',28,360);
-    burstRing(W/2,H*.55,'#39ff14');
-    burstRing(W/2,H*.55,'#00fff7');
-    for(let i=0;i<3;i++) spawnLightning(W/2,H*.55,W/2+rnd(-160,160),H*.55+rnd(-100,100),'#00fff7',6);
-    doShake(10,.2);bgPulse=.8;bgPulseColor='#00fff7';
-    playFx('powerup');
-    vibrate([40,20,40,20,90]);
-    updateBoosterBtn();
-  });
+  if(cdRemaining('booster')>0){toast(`⏳ Disponible en ${cdLabel(cdRemaining('booster'))}`,'#ff2255');return}
+  cdSave('booster');
+  rewardAnim('booster');
+  addConsumable('shield');addConsumable('tripleshot');addConsumable('ballmagnet');
+  saveShopData();renderItemBar();renderShop();
+  toast('🎁 PACK NEÓN: 🛡️ + 💫 + 🧲','#00fff7');
+  playFx('powerup');vibrate([40,20,40,20,90]);
+  updateBoosterBtn();
 }
 
+/* REVIVIR */
+function updateReviveBtn(){
+  if(!reviveAdBtn)return;
+  const rem=cdRemaining('revive');
+  const used=gameOverReviveUsed;
+  reviveAdBtn.disabled=used||(rem>0);
+  reviveAdBtn.style.opacity=(used||(rem>0))?'0.4':'';
+  reviveAdBtn.textContent=used?'✓ REVIVIR USADO':rem>0?`⏳ ${cdLabel(rem)}`:'💚 REVIVIR CON 3 VIDAS';
+  reviveAdBtn.classList.toggle('used',used);
+}
 function rewardRevive(){
   if(gameOverReviveUsed){toast('Solo 1 revive por partida','#ff2255');return}
-  requestRewardedAd('revive',()=>{
-    rewardAnim('revive');
-    gameOverReviveUsed=true;
-    if(reviveAdBtn)reviveAdBtn.classList.add('used');
-    gameoverScr.classList.remove('show');
-    gameoverActive=false;
-    playerLives=Math.min(3,maxLives||3);renderLives();
-    g.cs=Math.max(0,g.cs-1);updateHUD();
-    resetRally('player');
-    STATE='play';
-    burst(W/2,H/2,'#39ff14',60,500);
-    burstRing(W/2,H/2,'#39ff14');
-    burstRing(W/2,H/2,'#ffffff');
-    for(let i=0;i<5;i++) setTimeout(()=>{spawnLightning(W/2,H/2,rnd(0,W),rnd(0,H),'#39ff14',7)},i*80);
-    doShake(14,.35);bgPulse=1;bgPulseColor='#39ff14';
-    toast('🎥 REVIVIDO CON 3 VIDAS','#39ff14');
-    playFx('powerup');vibrate([80,30,120]);
-  });
+  if(cdRemaining('revive')>0){toast(`⏳ Disponible en ${cdLabel(cdRemaining('revive'))}`,'#ff2255');return}
+  cdSave('revive');
+  rewardAnim('revive');
+  gameOverReviveUsed=true;
+  if(reviveAdBtn)reviveAdBtn.classList.add('used');
+  gameoverScr.classList.remove('show');
+  gameoverActive=false;
+  playerLives=Math.min(3,maxLives||3);renderLives();
+  g.cs=Math.max(0,g.cs-1);updateHUD();
+  resetRally('player');STATE='play';
+  burst(W/2,H/2,'#39ff14',60,500);
+  burstRing(W/2,H/2,'#39ff14');burstRing(W/2,H/2,'#ffffff');
+  for(let i=0;i<5;i++) setTimeout(()=>{spawnLightning(W/2,H/2,rnd(0,W),rnd(0,H),'#39ff14',7)},i*80);
+  doShake(14,.35);bgPulse=1;bgPulseColor='#39ff14';
+  toast('💚 REVIVIDO CON 3 VIDAS','#39ff14');
+  playFx('powerup');vibrate([80,30,120]);
 }
 
+/* DOBLAR MONEDAS */
+function updateDoubleCoinsBtn(){
+  if(!doubleCoinsAdBtn)return;
+  const rem=cdRemaining('doublecoins');
+  const used=gameOverDoubleUsed||sessionCoinsEarned<=0;
+  doubleCoinsAdBtn.disabled=used||(rem>0);
+  doubleCoinsAdBtn.style.opacity=(used||(rem>0))?'0.4':'';
+  doubleCoinsAdBtn.textContent=gameOverDoubleUsed?'✓ DOBLADO':rem>0?`⏳ ${cdLabel(rem)}`:
+    sessionCoinsEarned>0?`💰 DOBLAR ${sessionCoinsEarned} MONEDAS`:'💰 DOBLAR MONEDAS';
+  doubleCoinsAdBtn.classList.toggle('used',gameOverDoubleUsed);
+}
 function rewardDoubleGameCoins(){
   if(gameOverDoubleUsed){toast('Ya has doblado estas monedas','#ff2255');return}
   const bonus=sessionCoinsEarned;
-  if(bonus<=0){toast('No hay monedas de partida para doblar','#ff2255');return}
-  requestRewardedAd('double_game_coins',()=>{
-    rewardAnim('doublecoins');
-    gameOverDoubleUsed=true;
-    if(doubleCoinsAdBtn)doubleCoinsAdBtn.classList.add('used');
-    addCoins(bonus,W/2,H*.48,'ad');
-    burst(W/2,H*.48,'#ffd700',50,440);
-    burstRing(W/2,H*.48,'#ffd700');
-    burstRing(W/2,H*.48,'#ffaa00');
-    for(let i=0;i<4;i++) spawnLightning(W/2,H*.48,W/2+rnd(-180,180),H*.48+rnd(-100,100),'#ffd700',6);
-    doShake(10,.2);bgPulse=.8;bgPulseColor='#ffd700';
-    toast(`🎥 MONEDAS DOBLADAS +${bonus}`,'#ffd700');
-    playFx('powerup');vibrate([50,30,100]);
-  });
+  if(bonus<=0){toast('No hay monedas para doblar','#ff2255');return}
+  if(cdRemaining('doublecoins')>0){toast(`⏳ Disponible en ${cdLabel(cdRemaining('doublecoins'))}`,'#ff2255');return}
+  cdSave('doublecoins');
+  rewardAnim('doublecoins');
+  gameOverDoubleUsed=true;
+  if(doubleCoinsAdBtn)doubleCoinsAdBtn.classList.add('used');
+  addCoins(bonus,W/2,H*.48,'free');
+  burst(W/2,H*.48,'#ffd700',50,440);
+  burstRing(W/2,H*.48,'#ffd700');burstRing(W/2,H*.48,'#ffaa00');
+  for(let i=0;i<4;i++) spawnLightning(W/2,H*.48,W/2+rnd(-180,180),H*.48+rnd(-100,100),'#ffd700',6);
+  doShake(10,.2);bgPulse=.8;bgPulseColor='#ffd700';
+  toast(`💰 MONEDAS DOBLADAS +${bonus}`,'#ffd700');
+  playFx('powerup');vibrate([50,30,100]);
 }
 
 /* ═══ TRANSLATIONS ═══ */
@@ -5594,7 +5607,7 @@ function applyTranslation(){
   // Menu buttons
   const nb=document.getElementById('newBtn');if(nb)nb.innerHTML=`<span style="font-size:20px">⚡</span> ${t('newGame').replace('⚡ ','')}`;
   const cb=document.getElementById('contBtn');if(cb)cb.textContent=t('cont');
-  const sk=document.getElementById('skinsToggle');if(sk)sk.textContent=t('skins');
+  const sk=document.getElementById('skinsToggle');if(sk)sk.innerHTML=`<span style="font-size:18px;vertical-align:middle">${curSkin().icon}</span> SKINS`;
   const rk=document.getElementById('rankingBtn');if(rk)rk.textContent=t('ranking');
   const sv=document.getElementById('survivalBtn');if(sv)sv.textContent=t('survival');
   const cfg=document.getElementById('settingsBtn');if(cfg)cfg.textContent=t('config');
@@ -5734,13 +5747,22 @@ function initSurvival(){
 }
 
 function updateSurvivalHUD(){
-  survivalWaveEl.textContent=`💀 OLA ${survivalWave}`;
+  survivalWaveEl.textContent=`${survivalWave}`;
 }
 
 function nextSurvivalWave(){
   survivalWave++;
   survivalCpuBoost=1+survivalWave*.1;
   updateSurvivalHUD();
+
+  // Animate skull
+  const skull=document.getElementById('survivalSkull');
+  if(skull){
+    skull.classList.remove('wave-up');
+    void skull.offsetWidth; // reflow to restart animation
+    skull.classList.add('wave-up');
+    setTimeout(()=>skull.classList.remove('wave-up'),650);
+  }
 
   // Speed info for toast
   const waveSpd=Math.round(Math.min(240+(survivalWave-1)*60, 1400));
@@ -5894,12 +5916,20 @@ function getConsumableCount(id){
   return e?e.count:0;
 }
 function addConsumable(id){
-  const existing=consumableInventory.find(x=>x.id===id);
+  // Only 1 consumable total in inventory at a time
+  if(consumableInventory.length>0&&!consumableInventory.find(x=>x.id===id)){
+    toast('Usa tu consumible actual primero','#ff2255');return;
+  }
   // Survival mode: ballmagnet capped at 3
   if(id==='ballmagnet'&&survivalMode&&getConsumableCount('ballmagnet')>=3){
     toast('🧲 Límite de imanes en Supervivencia (máx 3)','#ff2255');return;
   }
-  if(existing){existing.count++}
+  // Max 1 per consumable type
+  if(getConsumableCount(id)>=1){
+    toast('Ya tienes ese consumible','#ff2255');return;
+  }
+  const existing=consumableInventory.find(x=>x.id===id);
+  if(existing){existing.count=1;}
   else{
     const def=SHOP_ITEMS.find(x=>x.id===id);
     if(def) consumableInventory.push({id,icon:def.icon,name:def.name,count:1});
@@ -5914,6 +5944,8 @@ function useConsumable(id){
   renderItemBar();
   return true;
 }
+
+/* ── CONSUMABLE COOLDOWN removed — cooldown is per-item in shop (4h claim) ── */
 
 // Apply consumable effect in-game
 /* ── CONSUMABLE ACTIVATION ANIMATION ── */
@@ -6155,12 +6187,26 @@ function activateConsumable(id){
 }
 
 /* ── IN-GAME ITEM BAR ── */
+function getActiveTimer(id){
+  // Returns seconds remaining for active effects
+  switch(id){
+    case 'speedboost': return Math.max(0,Math.round(sessionBoosts.paddleSpeedT||0));
+    case 'ballmagnet': return Math.max(0,Math.round(magnetT||0));
+    case 'timefreeze': return Math.max(0,Math.round(cryoT||0));
+    case 'superfire':  return Math.max(0,Math.round(fireT||0));
+    case 'timewarp':   return 0; // instant
+    case 'shield':     return shieldActive?-1:0; // -1 = active indefinitely
+    case 'doublexp':   return sessionBoosts.doubleXP?-1:0;
+    default: return 0;
+  }
+}
+
 function renderItemBar(){
   const bar=document.getElementById('itemBar');
   if(!bar)return;
   bar.innerHTML='';
 
-  // In survival: only show ballmagnet, capped at 3
+  // In survival: only show ballmagnet
   let items=consumableInventory;
   if(survivalMode){
     const magnet=consumableInventory.find(x=>x.id==='ballmagnet');
@@ -6169,10 +6215,23 @@ function renderItemBar(){
 
   if(items.length===0){bar.style.display='none';return}
   bar.style.display='flex';
+
   items.forEach(item=>{
     const btn=document.createElement('button');
     btn.className='item-bar-btn';
-    btn.innerHTML=`<span style="font-size:20px">${item.icon}</span><span class="item-bar-count">${item.count}</span>`;
+    const timer=getActiveTimer(item.id);
+    const isActive=timer!==0;
+
+    if(isActive){
+      // Show active glow + timer
+      const timerStr=timer===-1?'●':timer>0?`${timer}s`:'';
+      btn.innerHTML=`<span style="font-size:18px">${item.icon}</span><span class="item-bar-count" style="color:#39ff14;font-size:8px">${timerStr}</span>`;
+      btn.style.borderColor='rgba(57,255,20,.6)';
+      btn.style.boxShadow='0 0 12px rgba(57,255,20,.4)';
+      btn.style.background='rgba(57,255,20,.12)';
+    } else {
+      btn.innerHTML=`<span style="font-size:20px">${item.icon}</span><span class="item-bar-count">${item.count}</span>`;
+    }
     btn.title=item.name;
     btn.addEventListener('click',e=>{e.stopPropagation();activateConsumable(item.id)});
     btn.addEventListener('touchend',e=>{e.stopPropagation();e.preventDefault();activateConsumable(item.id)},{passive:false});
@@ -6183,18 +6242,17 @@ function renderItemBar(){
 function loadShopData(){
   try{
     const d=JSON.parse(localStorage.getItem('ntr4_shop')||'{}');
+    // Restore owned (inactive purchases carry over), but NOT active (reset each game)
     if(d.owned)ownedItems=new Set(d.owned);
-    if(d.active)activeItems=new Set(d.active);
-    else activeItems=new Set(d.owned||[]); // legacy: all owned = active
     if(d.boosts)Object.assign(itemBoosts,d.boosts);
     if(d.inventory)consumableInventory=d.inventory;
-    applyPermBoost(); // recalc on load
   }catch(e){}
 }
 function saveShopData(){
   const permBoosts={};
   ['paddleSize','cpuSlow','extraAngle','doubleCoin','fireDuration','alwaysSlowPerfect'].forEach(k=>{permBoosts[k]=itemBoosts[k]});
-  try{localStorage.setItem('ntr4_shop',JSON.stringify({owned:[...ownedItems],active:[...activeItems],boosts:permBoosts,inventory:consumableInventory}))}catch(e){}
+  // Save owned (inactive) but not active
+  try{localStorage.setItem('ntr4_shop',JSON.stringify({owned:[...ownedItems],boosts:permBoosts,inventory:consumableInventory}))}catch(e){}
 }
 
 /* ── CONFIRM MODAL ── */
@@ -6258,22 +6316,6 @@ function togglePermItem(id){
   playFx('powerup');vibrate([20,10,40]);
 }
 
-function watchAdForItem(item){
-  requestRewardedAd('shop_item_'+item.id,()=>{
-    // Grant just enough coins to buy
-    const needed=Math.max(0,item.price-coins);
-    if(needed>0){addCoins(needed,W/2,H*.5,'ad');}
-    playFx('powerup');vibrate([30,20,60]);
-    // Delay so coins are added before buying
-    setTimeout(()=>{
-      if(item.type==='permanent'){
-        showConfirm(item,()=>_doBuy(item));
-      } else {
-        _doBuy(item);
-      }
-    },400);
-  });
-}
 
 function _doBuy(item){
   if(coins<item.price){toast('🪙 Error de monedas','#ff2255');return}
@@ -6511,13 +6553,10 @@ function permBuyAnim(id){
 
 function buyItem(item){
   if(item.type==='permanent'&&ownedItems.has(item.id)) return;
-  if(item.id==='ballmagnet'&&survivalMode&&getConsumableCount('ballmagnet')>=3){
-    toast('🧲 Límite: máx 3 imanes en Supervivencia','#ff2255');return;
+  if(item.type!=='permanent'&&consumableInventory.length>0){
+    toast('Usa tu consumible actual primero','#ff2255');return;
   }
-  if(coins<item.price){
-    watchAdForItem(item);
-    return;
-  }
+  if(coins<item.price){toast('🪙 Monedas insuficientes','#ff2255');return}
   if(item.type==='permanent'){
     showConfirm(item,()=>_doBuy(item));
     return;
@@ -6529,7 +6568,7 @@ function renderShop(){
   const container=document.getElementById('shopItems');
   if(!container)return;
   const rarityColors={COMÚN:'#aaa',RARO:'#00fff7',ÉPICO:'#b44cff',LEGENDARIO:'#ffd700'};
-  container.innerHTML=`<div class="shop-ad-row"><button class="reward-btn" id="shopCoinsAdBtn">🎥 +50 MONEDAS GRATIS</button><div class="ad-small-note">Vídeo recompensado · ideal para AdMob</div></div>`;
+  container.innerHTML=``;
   container.innerHTML+='<div style="grid-column:1/-1;font-family:Orbitron,monospace;font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.12em;padding:4px 0">CONSUMIBLES — se guardan y usan en partida</div>';
   const consumables=SHOP_ITEMS.filter(x=>x.type==='consumable');
   const permanents=SHOP_ITEMS.filter(x=>x.type==='permanent');
@@ -6538,17 +6577,21 @@ function renderShop(){
     const active=owned&&activeItems.has(item.id);
     const canAfford=coins>=item.price;
     const count=getConsumableCount(item.id);
-    const needsAd=!canAfford&&!owned;
-    const cls=['shop-item',owned?(active?'owned':''):'',needsAd?'watch-ad':''].filter(Boolean).join(' ');
+    const hasThis=count>0;
+    const inventoryFull=item.type!=='permanent'&&consumableInventory.length>0&&!hasThis;
+    const cls=['shop-item',owned?(active?'owned':''):''].filter(Boolean).join(' ');
     const badge=owned
       ?`<div class="shop-item-badge owned-badge" style="background:${active?'rgba(57,255,20,.25)':'rgba(255,255,255,.1)'};color:${active?'#39ff14':'rgba(255,255,255,.4)'}">${active?'ON':'OFF'}</div>`
-      :count>0?`<div class="shop-item-badge" style="background:rgba(255,215,0,.25);color:#ffd700">${count}</div>`:'';
+      :hasThis?`<div class="shop-item-badge" style="background:rgba(255,215,0,.25);color:#ffd700">✓</div>`:'';
     let priceHtml;
     if(owned){
       priceHtml=`<button class="perm-toggle${active?'':' off'}" data-toggle-id="${item.id}">${active?'● ACTIVO':'○ INACTIVO'}</button>`;
-    }else if(needsAd){
-      priceHtml=`<div class="shop-item-price" style="color:rgba(255,255,255,.35);text-decoration:line-through">${item.price}🪙</div>
-        <button class="shop-item-ad-btn" data-ad-id="${item.id}">🎥 VER VÍDEO</button>`;
+    }else if(hasThis){
+      priceHtml=`<div class="shop-item-price" style="color:#39ff14;font-size:9px">✓ EN INVENTARIO</div>`;
+    }else if(inventoryFull){
+      priceHtml=`<div class="shop-item-price" style="color:rgba(255,255,255,.3);font-size:9px">🔒 SLOT OCUPADO</div>`;
+    }else if(!canAfford){
+      priceHtml=`<div class="shop-item-price" style="color:rgba(255,255,255,.3);text-decoration:line-through">${item.price}🪙</div><div style="font-size:8px;color:rgba(255,255,255,.25);font-family:Orbitron,monospace;letter-spacing:.06em">SIN MONEDAS</div>`;
     }else{
       priceHtml=`<div class="shop-item-price">${item.price}🪙</div>`;
     }
@@ -6573,23 +6616,13 @@ function renderShop(){
         togglePermItem(toggleBtn.dataset.toggleId);
       });
     }
-    // Video button
-    const adBtn=el.querySelector('.shop-item-ad-btn');
-    if(adBtn){
-      adBtn.addEventListener('click',e=>{
-        e.stopPropagation();
-        const item=SHOP_ITEMS.find(i=>i.id===adBtn.dataset.adId);
-        if(item)watchAdForItem(item);
-      });
-    }
-    // Card click — buy if not owned
+    // Card click — buy with coins
     el.addEventListener('click',()=>{
       const item=SHOP_ITEMS.find(i=>i.id===el.dataset.id);
       if(item)buyItem(item);
     });
   });
-  const shopCoinsAdBtn=document.getElementById('shopCoinsAdBtn');
-  if(shopCoinsAdBtn){shopCoinsAdBtn.addEventListener('click',()=>rewardFreeCoins(50));updateCoinBtns();}
+  // shop coins button removed
 }
 
 // Shop DOM
