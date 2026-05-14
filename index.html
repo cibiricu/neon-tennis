@@ -4954,7 +4954,9 @@ pauseBtn.addEventListener('pointerdown',e=>e.stopPropagation());
 pauseBtn.addEventListener('pointerup',handlePauseButton);
 pauseBtn.addEventListener('click',handlePauseButton);
 
-function exitApp(){
+function performExitApp(){
+  try{if(typeof save==='function')save();}catch(e){}
+
   try{
     if(window.Android&&typeof window.Android.exitApp==='function'){
       window.Android.exitApp();
@@ -4965,6 +4967,10 @@ function exitApp(){
   try{window.close()}catch(e){}
 
   toast('USA EL BOTÓN ATRÁS DEL MÓVIL PARA CERRAR','#ffd700');
+}
+
+function exitApp(){
+  showExitConfirm(performExitApp);
 }
 
 function goToMenu(){
@@ -6539,6 +6545,24 @@ function showConfirm(item,onConfirm){
   document.getElementById('confirmTitle').textContent=item.name+' — '+item.price+'🪙';
   document.getElementById('confirmBody').textContent=item.desc;
   document.getElementById('confirmYes').textContent=`✓ COMPRAR ${item.price}🪙`;
+  document.getElementById('confirmNo').textContent='✕ CANCELAR';
+  const warn=modal.querySelector('.confirm-warn');
+  if(warn){warn.style.display='block';warn.textContent='⚠️ SOLO ACTIVO EN MODO SUPERVIVENCIA'}
+  _confirmCallback=onConfirm;
+  modal.classList.add('show');
+}
+
+function showExitConfirm(onConfirm){
+  wireConfirm();
+  const modal=getConfirmModal();
+  if(!modal){onConfirm();return;}
+  document.getElementById('confirmIcon').textContent='🎾';
+  document.getElementById('confirmTitle').textContent='¿SALIR DEL JUEGO?';
+  document.getElementById('confirmBody').textContent='Tu progreso se guardará. ¿Seguro que quieres cerrar Neon Tennis Rush?';
+  document.getElementById('confirmYes').textContent='✓ SÍ, SALIR';
+  document.getElementById('confirmNo').textContent='↩ VOLVER';
+  const warn=modal.querySelector('.confirm-warn');
+  if(warn){warn.style.display='none'}
   _confirmCallback=onConfirm;
   modal.classList.add('show');
 }
