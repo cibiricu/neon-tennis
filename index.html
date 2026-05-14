@@ -846,7 +846,7 @@ if('serviceWorker' in navigator){
         </div>
         <div class="xp-track"><div class="xp-fill" id="xpBar"></div><div class="xp-glow"></div></div>
       </div>
-      <div class="pill-info glass" id="pillText">CLASSIC NEON</div>
+      <div class="pill-info glass" id="pillText" style="display:none">CLASSIC NEON</div>
     </div>
   </div>
 
@@ -1394,6 +1394,7 @@ let ghostT=0;    // ball becomes semi-invisible to CPU
 let multiActive=false;
 const ghostBalls=[];
 let cryoT=0,warpActive=0;
+let spiralZoom=false,spiralHitsLeft=0,spiralT=0,spiralAngle=0;
 let skinFreezeT=0;
 let cpuBallX=0;
 
@@ -1517,7 +1518,7 @@ function updateHUD(){
   xpBarEl.style.width=pct+'%';
   lvlLblEl.textContent='LVL '+lvl;
   xpLblEl.textContent=info.xpInLevel+'/'+info.xpNeeded+' XP';
-  pillTextEl.textContent=theme().name;
+  // pillTextEl hidden — world name removed
   // Menu stats
   const mLvl=document.getElementById('menuLvl');
   const mBest=document.getElementById('menuBest');
@@ -1771,7 +1772,9 @@ function applyPower(effect,color){
 
     case 'fire': {
       fireT=4*(survivalMode?itemBoosts.fireDuration:1);
-      fireBallActive=false; // armed on next player hit
+      // If ball already heading toward CPU, arm immediately
+      if(ball.vy<0){fireBallActive=true;ball.vy*=1.3;toast('🔥 INFERNO — ¡ATRAVIESA!','#ff6600');}
+      else{fireBallActive=false;toast('🔥 INFERNO — GOLPEA PARA ATRAVESAR!','#ff6600');}
       for(let i=0;i<40;i++){
         const ang=rnd(0,Math.PI*2),spd=rnd(80,380);
         const fc=rnd(0,1)>.5?'#ff6600':'#ff2200';
@@ -1780,7 +1783,6 @@ function applyPower(effect,color){
       burstRing(ball.x,ball.y,'#ff6600');
       burstRing(ball.x,ball.y,'#ff2200');
       doShake(10,.2);
-      toast('🔥 INFERNO — GOLPEA PARA ATRAVESAR!','#ff6600');
       playFx('powerup');
       vibrate([30,20,80,20,30]);
       break;
@@ -1903,29 +1905,37 @@ function applyPower(effect,color){
     }
 
     case 'multi': {
-      // Multi-ball: spawn 3 decoy balls that confuse CPU
+      // CHAOS BALL: 6 identical decoys — same look as real ball
       ghostBalls.length=0;
-      for(let i=0;i<3;i++){
-        const spreadAng=rnd(-0.6,0.6);
-        const spd=Math.sqrt(ball.vx**2+ball.vy**2)*(0.7+Math.random()*.5);
-        const baseAng=Math.atan2(ball.vy,ball.vx)+spreadAng;
+      const realSpd=Math.sqrt(ball.vx**2+ball.vy**2);
+      const realAng=Math.atan2(ball.vy,ball.vx);
+      const DECOYS=6;
+      const skinCol=curSkin().color||'#f4ff71';
+      for(let i=0;i<DECOYS;i++){
+        // Spread evenly in all directions at similar speed to real ball
+        const ang=realAng+(i/DECOYS)*Math.PI*2+rnd(-0.2,0.2);
+        const spd=realSpd*(0.75+Math.random()*.5);
         ghostBalls.push({
           x:ball.x, y:ball.y,
-          vx:Math.cos(baseAng)*spd,
-          vy:Math.sin(baseAng)*spd,
-          life:3.5+Math.random(), alpha:0.65
+          vx:Math.cos(ang)*spd,
+          vy:Math.sin(ang)*spd,
+          life:12, // long life — only removed by goal
+          alpha:1,
+          color:skinCol,
+          scale:1 // same size as real ball
         });
       }
       multiActive=true;
-      // Explosion: 3 colored bursts
-      burst(ball.x,ball.y,'#ff88ff',20,380);
-      burst(ball.x,ball.y,'#ffaaff',15,260);
-      burstRing(ball.x,ball.y,'#ff88ff');
-      burstRing(ball.x,ball.y,'#ffccff');
-      for(let i=0;i<4;i++) spawnLightning(ball.x,ball.y,ball.x+rnd(-180,180),ball.y+rnd(-120,120),'#ff88ff',7);
-      doShake(10,.25);
-      toast('💫 MULTI BALL! 3 PELOTAS','#ff88ff');
-      vibrate([50,30,50,30,50]); // triple thump = 3 balls
+      // Spectacular burst on activation
+      burst(ball.x,ball.y,skinCol,40,420);
+      burstRing(ball.x,ball.y,skinCol);
+      burstRing(ball.x,ball.y,'#ffffff');
+      for(let i=0;i<6;i++) setTimeout(()=>{
+        spawnLightning(ball.x,ball.y,ball.x+rnd(-W*.4,W*.4),ball.y+rnd(-H*.3,H*.3),skinCol,8);
+      },i*50);
+      doShake(14,.3);bgPulse=1.2;bgPulseColor=skinCol;
+      toast('💫 CHAOS BALL — ¡ADIVINA CUÁL!','#ff88ff');
+      vibrate([60,20,60,20,120]);
       break;
     }
   }
@@ -1964,8 +1974,8 @@ function launchBall(){
     maxSpd=430;
   }else if(survivalMode){
     // SURVIVAL: muy agresivo — Ola1=240, +60 por ola, sin techo hasta ola 20 (~1380px/s)
-    const waveBase=240+((survivalWave-1)*60);
-    maxSpd=Math.min(waveBase*1.1, 1400);
+    const waveBase=280+((survivalWave-1)*90);
+    maxSpd=Math.min(waveBase*1.1, 2000);
     base=Math.min(waveBase, maxSpd);
   }else{
     maxSpd={easy:280,medium:360,hard:430}[diff]||360;
@@ -1978,13 +1988,27 @@ function launchBall(){
   cpuBallX=ball.x;
 }
 
+let nitroBoosted=false; // bypass clamp after nitro
+
 function clampBallSpeed(){
+  if(nitroBoosted){nitroBoosted=false;return;} // skip clamp once after nitro
   let maxSpd;
   if(twoPlayer) maxSpd=430;
-  else if(survivalMode) maxSpd=Math.min(240+(survivalWave-1)*60*1.1, 1420);
+  else if(survivalMode) maxSpd=Math.min(280+(survivalWave-1)*90*1.1, 2020);
   else maxSpd={easy:310,medium:400,hard:480}[diff]||400;
   const spd=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
   if(spd>maxSpd){const ratio=maxSpd/spd;ball.vx*=ratio;ball.vy*=ratio}
+
+  // SURVIVAL: enforce minimum vertical speed so ball never crawls across the court
+  if(survivalMode){
+    const minVy=Math.min(180+(survivalWave-1)*20, 420);
+    if(Math.abs(ball.vy)<minVy){
+      ball.vy=(ball.vy<0?-1:1)*minVy;
+      // compensate vx so total speed stays the same
+      const newSpd=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
+      if(newSpd>maxSpd){const r=maxSpd/newSpd;ball.vx*=r;ball.vy*=r;}
+    }
+  }
 }
 
 function serve(who){
@@ -2052,6 +2076,8 @@ function addXP(base){
 /* ─────────── SCORE POINT ─────────── */
 function scorePoint(winner){
   STATE='point';
+  // Clear all decoy balls immediately on goal
+  ghostBalls.length=0;multiActive=false;
   stopRecording();
   cpuDestroyed=false;cpuDestroyT=0;
   bombFragments.length=0;bombExplosion=null;
@@ -2086,12 +2112,21 @@ function scorePoint(winner){
     if(!twoPlayer&&!survivalMode){
       if(shieldActive){
         shieldActive=false;
-        toast('🛡️ ¡ESCUDO BLOQUEÓ!','#00fff7');
-        burstRing(ball.x,ball.y,'#00fff7');
-        // Don't return — let game continue normally
-        doShake(6,.15);
-        setTimeout(()=>{resetRally('player');STATE='play'},780);
-        return;
+        if(Math.random()<0.45){
+          // 45% — escudo bloquea
+          toast('🛡️ ¡ESCUDO BLOQUEÓ!','#00fff7');
+          burstRing(ball.x,ball.y,'#00fff7');
+          burstRing(ball.x,ball.y,'#ffffff');
+          doShake(6,.15);
+          setTimeout(()=>{resetRally('player');STATE='play'},780);
+          return;
+        }else{
+          // 25% — escudo falla
+          toast('🛡️ ¡ESCUDO FALLÓ!','#ff2255');
+          burstRing(ball.x,ball.y,'#ff2255');
+          doShake(8,.2);
+          // Falls through to loseLife()
+        }
       }
       loseLife();
     }
@@ -2119,9 +2154,9 @@ function scorePoint(winner){
     // Every 2 player points = new wave
     if(g.ps%2===0&&g.ps>0) setTimeout(()=>nextSurvivalWave(),800);
   }
-  // Start replay then serve
+  // Start replay then serve — but not if game over was triggered
   startRecording();
-  setTimeout(()=>{resetRally(next);STATE='play'},780);
+  setTimeout(()=>{if(!gameoverActive){resetRally(next);STATE='play'}},780);
 }
 
 /* ─────────── UPDATE ─────────── */
@@ -2481,7 +2516,7 @@ function stopWinFireworks(){
 
 function triggerGameOver(){
   gameoverActive=true;
-  STATE='point';
+  STATE='pause'; // freeze physics for ALL modes
   goScore.textContent=g.ps;
   goLevel.textContent=getLevelFromXP(xpTotal).lvl;
   goBest.textContent=best;
@@ -2759,6 +2794,7 @@ function update(dt){
   if(scoreFlash.p>0)scoreFlash.p-=dt*3.5;
   if(scoreFlash.c>0)scoreFlash.c-=dt*3.5;
   if(sessionBoosts.paddleSpeedT>0){sessionBoosts.paddleSpeedT-=dt;if(sessionBoosts.paddleSpeedT<=0){sessionBoosts.paddleSpeed=1;sessionBoosts.paddleSpeedT=0}}
+  if(sessionBoosts.doubleXpT>0){sessionBoosts.doubleXpT-=dt;if(sessionBoosts.doubleXpT<=0){sessionBoosts.doubleXP=false;sessionBoosts.doubleXpT=0;toast('⭐ 2×XP expirado','#ffd700')}}
   if(fireT>0){fireT-=dt;if(fireT<=0){fireT=0;fireBallActive=false;fireTrailActive=false;}}
   // cpuFireActive decays if ball reaches bottom without hitting player
   if(cpuFireActive&&ball.y>court.y+court.h*.7)cpuFireActive=false;
@@ -2818,17 +2854,36 @@ function update(dt){
   }
   if(cryoT>0)cryoT-=dt;
   if(warpActive>0)warpActive-=dt;
+  if(spiralZoom){spiralT+=dt;spiralAngle+=dt*1.8;}
   if(rainbowT>0)rainbowT-=dt;
   if(magnetT>0)magnetT-=dt;
   if(ghostT>0)ghostT-=dt;
   if(skinFreezeT>0)skinFreezeT-=dt;
   flickerT+=dt*2.6;
 
-  // Ghost decoy balls
+  // Ghost decoy balls — bounce like real ball, disappear on goal
   for(let i=ghostBalls.length-1;i>=0;i--){
     const gb=ghostBalls[i];
-    gb.x+=gb.vx*dt;gb.y+=gb.vy*dt;gb.life-=dt;
-    if(gb.x<court.x||gb.x>court.x+court.w)gb.vx*=-1;
+    gb.x+=gb.vx*dt*timeScale;
+    gb.y+=gb.vy*dt*timeScale;
+    // Bounce off side walls
+    if(gb.x-ball.r<court.x){gb.x=court.x+ball.r;gb.vx=Math.abs(gb.vx)}
+    if(gb.x+ball.r>court.x+court.w){gb.x=court.x+court.w-ball.r;gb.vx=-Math.abs(gb.vx)}
+    // Bounce off top/bottom walls (stay in court)
+    if(gb.y-ball.r<court.y){gb.y=court.y+ball.r;gb.vy=Math.abs(gb.vy)}
+    if(gb.y+ball.r>court.y+court.h){gb.y=court.y+court.h-ball.r;gb.vy=-Math.abs(gb.vy)}
+    // Bounce off player paddle
+    if(gb.vy>0&&gb.y+ball.r>=player.y-player.h/2&&gb.y-ball.r<=player.y+player.h/2
+       &&gb.x>=player.x-player.w/2&&gb.x<=player.x+player.w/2){
+      gb.vy=-Math.abs(gb.vy);gb.y=player.y-player.h/2-ball.r;
+    }
+    // Bounce off CPU paddle
+    if(gb.vy<0&&gb.y-ball.r<=cpu.y+cpu.h/2&&gb.y+ball.r>=cpu.y-cpu.h/2
+       &&gb.x>=cpu.x-cpu.w/2&&gb.x<=cpu.x+cpu.w/2){
+      gb.vy=Math.abs(gb.vy);gb.y=cpu.y+cpu.h/2+ball.r;
+    }
+    // Remove only when life expires (goal clears all via ghostBalls.length=0)
+    gb.life-=dt;
     if(gb.life<=0){ghostBalls.splice(i,1);if(ghostBalls.length===0)multiActive=false}
   }
 
@@ -2967,6 +3022,12 @@ function update(dt){
   // Player hit
   const playerHitZone=cpuFireActive?28:15;
   if(ball.vy>0&&Math.abs(ball.y-player.y)<playerHitZone&&Math.abs(ball.x-player.x)<player.w/2+ball.r){
+    // Count spiral zoom hits
+    if(spiralZoom){
+      spiralHitsLeft--;
+      if(spiralHitsLeft<=0){spiralZoom=false;slowT=0;timeScale=1;doShake(14,.3);toast('🌀 TIEMPO RESTAURADO','#b44cff');}
+      else{toast(`🌀 ${spiralHitsLeft} golpe${spiralHitsLeft>1?'s':''} restante${spiralHitsLeft>1?'s':''}...`,'#b44cff');}
+    }
 
     // CPU FIRE PIERCE — ball goes through player paddle
     if(cpuFireActive){
@@ -3057,10 +3118,15 @@ function update(dt){
   // Use wider zone for fire ball to prevent high-speed tunneling
   const cpuHitZone = fireBallActive ? 28 : 15;
   if(!cpuDestroyed&&ball.vy<0&&Math.abs(ball.y-cpu.y)<cpuHitZone&&Math.abs(ball.x-cpu.x)<cpu.w/2+ball.r+4){
+    if(spiralZoom&&!fireBallActive){
+      spiralHitsLeft--;
+      if(spiralHitsLeft<=0){spiralZoom=false;slowT=0;timeScale=1;doShake(14,.3);toast('🌀 TIEMPO RESTAURADO','#b44cff');}
+      else{toast(`🌀 ${spiralHitsLeft} golpe${spiralHitsLeft>1?'s':''} restante${spiralHitsLeft>1?'s':''}...`,'#b44cff');}
+    }
     if(fireBallActive){
-      // ── PIERCE THROUGH ──
-      ball.vy=-Math.abs(ball.vy);
-      ball.y=cpu.y-cpu.h/2-ball.r-4; // push clearly past paddle
+      // ── PIERCE THROUGH — ball continues past CPU ──
+      ball.vy=-Math.abs(ball.vy)*1.1; // keep going up (negative = toward top = score)
+      ball.y=cpu.y-cpu.h/2-ball.r-6; // push past paddle
       fireBallActive=false; // consumed — needs new player hit to re-arm
       fireTrailActive=true; fireTrail.length=0;
       fireHoles.push({x:ball.x,y:cpu.y,life:2.8,r:ball.r*2.6});
@@ -3128,8 +3194,8 @@ function update(dt){
   puSpawnT-=dt;
   if(puSpawnT<=0){
     // Base intervals are longer now — powerups are rarer / more meaningful
-    const spawnInterval={easy:[8,14],medium:[16,28],hard:[22,38]}[diff]||[16,28];
-    const spawnChance={easy:.85,medium:.55,hard:.38}[diff]||.55;
+    const spawnInterval={easy:[8,14],medium:[16,28],hard:[14,24]}[diff]||[16,28];
+    const spawnChance={easy:.85,medium:.55,hard:.60}[diff]||.55;
     puSpawnT=rnd(spawnInterval[0],spawnInterval[1]);
 
     if(Math.random()<spawnChance){
@@ -3603,12 +3669,29 @@ function drawBall(){
   const ang=Math.atan2(ball.vy,ball.vx);
   const globalBallAlpha=ghostT>0?(0.35+Math.sin(flickerT*8)*.2):1;
 
-  // Ghost decoy balls (multi power)
-  ghostBalls.forEach(gb=>{
-    ctx.globalAlpha=gb.alpha*.6;
-    ctx.fillStyle='#ff88ff';ctx.shadowBlur=shadowQ(10);ctx.shadowColor='#ff88ff';
-    ctx.beginPath();ctx.arc(gb.x,gb.y,ball.r*.8,0,Math.PI*2);ctx.fill();
+  // Ghost decoy balls — drawn IDENTICALLY to real ball to confuse
+  ghostBalls.forEach((gb,idx)=>{
+    const pulse=0.85+0.15*Math.sin(flickerT*5+idx*1.1);
+    const r=ball.r*(gb.scale||1)*pulse;
+    const col=gb.color||curSkin().color||'#f4ff71';
+    ctx.save();
+    ctx.translate(gb.x,gb.y);
+    // Outer glow — same as real ball
+    ctx.globalAlpha=gb.alpha*.5;
+    ctx.shadowBlur=shadowQ(22);ctx.shadowColor=col;
+    ctx.fillStyle=col;
+    ctx.beginPath();ctx.arc(0,0,r*1.4,0,Math.PI*2);ctx.fill();
+    // Core
+    const grad=ctx.createRadialGradient(-r*.3,-r*.3,r*.1,0,0,r);
+    grad.addColorStop(0,'#fff');
+    grad.addColorStop(0.3,col);
+    grad.addColorStop(1,col+'88');
+    ctx.globalAlpha=gb.alpha;
+    ctx.shadowBlur=shadowQ(14);ctx.shadowColor=col;
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;ctx.shadowBlur=0;
+    ctx.restore();
   });
 
   // Trail — LOW skips, NORMAL standard, HIGH has glow per segment
@@ -4475,6 +4558,18 @@ function render(ts){
   if(shake.t>0){ox=(Math.random()-.5)*shake.pwr*2;oy=(Math.random()-.5)*shake.pwr*2}
   ctx.save();ctx.translate(ox,oy);
 
+  // SPIRAL ZOOM — camera zooms toward ball with slow rotation
+  if(spiralZoom&&(STATE==='play'||STATE==='point')){
+    const zoom=1+Math.min(spiralT*.35,0.85); // zoom up to 1.85x
+    const rot=spiralAngle*.18; // gentle rotation
+    const bx=ball.x,by=ball.y;
+    // Translate to ball, rotate+zoom, translate back
+    ctx.translate(bx,by);
+    ctx.rotate(rot);
+    ctx.scale(zoom,zoom);
+    ctx.translate(-bx,-by);
+  }
+
   if(STATE==='menu'||STATE==='pause'){
     drawMenuBg(ts);
     drawRings();
@@ -4534,7 +4629,55 @@ function render(ts){
     drawLevelUp();
   }
 
-  ctx.restore();
+  ctx.restore(); // end zoom transform
+
+  // SPIRAL OVERLAY — drawn in screen space on top of everything
+  if(spiralZoom&&(STATE==='play'||STATE==='point')){
+    ctx.save();
+    const cx=W/2,cy=H/2;
+    const arms=12;
+    const maxR=Math.max(W,H)*0.8;
+    ctx.globalAlpha=0.12+0.06*Math.sin(spiralT*4);
+    for(let a=0;a<arms;a++){
+      const baseAng=(a/arms)*Math.PI*2+spiralAngle*2.5;
+      const grad=ctx.createLinearGradient(
+        cx+Math.cos(baseAng)*20,cy+Math.sin(baseAng)*20,
+        cx+Math.cos(baseAng)*maxR,cy+Math.sin(baseAng)*maxR
+      );
+      grad.addColorStop(0,'#b44cff');
+      grad.addColorStop(0.5,'#7700cc44');
+      grad.addColorStop(1,'transparent');
+      ctx.strokeStyle=grad;
+      ctx.lineWidth=2+Math.sin(spiralT*3+a)*1.5;
+      ctx.shadowBlur=18;ctx.shadowColor='#b44cff';
+      ctx.beginPath();
+      // Spiral arm
+      for(let r=0;r<maxR;r+=4){
+        const ang=baseAng+r*0.018-spiralAngle;
+        const px=cx+Math.cos(ang)*r;
+        const py=cy+Math.sin(ang)*r;
+        r===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+    // Vignette ring around ball position
+    ctx.globalAlpha=0.25+0.15*Math.sin(spiralT*6);
+    const vg=ctx.createRadialGradient(ball.x,ball.y,20,ball.x,ball.y,Math.min(W,H)*.6);
+    vg.addColorStop(0,'transparent');
+    vg.addColorStop(0.7,'transparent');
+    vg.addColorStop(1,'rgba(100,0,180,.5)');
+    ctx.fillStyle=vg;
+    ctx.fillRect(0,0,W,H);
+    // Hit counter
+    ctx.globalAlpha=0.9;
+    ctx.font=`900 ${Math.round(W*.12)}px Orbitron,monospace`;
+    ctx.textAlign='center';
+    ctx.fillStyle='#b44cff';
+    ctx.shadowBlur=30;ctx.shadowColor='#b44cff';
+    ctx.fillText(`${spiralHitsLeft}`,W*.85,H*.15);
+    ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.textAlign='left';
+    ctx.restore();
+  }
 }
 
 /* ─────────── LOOP ─────────── */
@@ -4596,7 +4739,8 @@ function startSession(){
   boosterUsedThisSession=false;updateBoosterBtn();
   
   shieldActive=false;
-  sessionBoosts.doubleXP=false;
+  sessionBoosts.doubleXP=false;sessionBoosts.doubleXpT=0;
+  spiralZoom=false;spiralHitsLeft=0;spiralT=0;spiralAngle=0;
   sessionBoosts.paddleSpeed=1;sessionBoosts.paddleSpeedT=0;
   renderItemBar();
   const itemBarEl=document.getElementById('itemBar');
@@ -4647,6 +4791,7 @@ function isUIElement(el){
 
 document.addEventListener('touchstart',function(e){
   if(STATE!=='play')return;
+  if(gameoverActive){p1TouchId=null;p2TouchId=null;return;}
 
   // IMPORTANT: do not call preventDefault() when the touch starts on UI buttons
   // like PAUSE. Android WebView can cancel the button click if we preventDefault
@@ -4675,6 +4820,7 @@ document.addEventListener('touchstart',function(e){
 
 document.addEventListener('touchmove',function(e){
   if(STATE!=='play')return;
+  if(gameoverActive)return;
   e.preventDefault();
   for(let i=0;i<e.changedTouches.length;i++){
     const t=e.changedTouches[i];
@@ -4836,7 +4982,6 @@ if(goRetryBtn) goRetryBtn.addEventListener('click',()=>{
   g.ps=0;g.cs=0;combo=0;
   survivalMode=true;twoPlayer=false;
   survivalWave=0;survivalCpuBoost=1;
-  activeItems.forEach(id=>ownedItems.delete(id));activeItems.clear();applyPermBoost();saveShopData();
   screenTransition(()=>startSession());
 });
 
@@ -4921,7 +5066,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&STATE==='p
 ═══════════════════════════════════════════ */
 let audioCtx=null;
 let musicGain=null, fxGain=null;
-let musicOscillators=[];
+let musicNodes=[];
 let audioStarted=false;
 
 function getAudioCtx(){
@@ -4984,12 +5129,89 @@ function playFx(type){
   }
 }
 
+/* ── BACKGROUND MUSIC — calm ambient, Web Audio ── */
+let musicScheduled=false;
+
 function startMusic(){
-  // Music disabled - caused buzzing
+  if(!audioCtx||!musicGain)return;
+  stopMusic();
+  musicScheduled=true;
+  scheduleMusicLoop();
 }
+
 function stopMusic(){
-  musicOscillators.forEach(o=>{try{o.stop()}catch(e){}});
-  musicOscillators=[];
+  musicNodes.forEach(n=>{try{n.stop&&n.stop();n.disconnect&&n.disconnect()}catch(e){}});
+  musicNodes=[];
+  musicScheduled=false;
+}
+
+function makeNote(freq,startT,dur,vol,type='sine',detune=0){
+  const ac=audioCtx;
+  const osc=ac.createOscillator();
+  const env=ac.createGain();
+  const filter=ac.createBiquadFilter();
+  filter.type='lowpass';filter.frequency.value=1200;filter.Q.value=0.8;
+  osc.type=type;
+  osc.frequency.value=freq;
+  osc.detune.value=detune;
+  osc.connect(filter);filter.connect(env);env.connect(musicGain);
+  const atk=0.12,rel=dur*0.55;
+  env.gain.setValueAtTime(0,startT);
+  env.gain.linearRampToValueAtTime(vol,startT+atk);
+  env.gain.setValueAtTime(vol,startT+dur-rel);
+  env.gain.linearRampToValueAtTime(0,startT+dur);
+  osc.start(startT);osc.stop(startT+dur+0.05);
+  musicNodes.push(osc);
+}
+
+function makePad(freqs,startT,dur,vol){
+  freqs.forEach((f,i)=>{
+    makeNote(f,startT,dur,vol*(0.5-i*0.08),'sine',i*3);
+    makeNote(f*2,startT+0.1*i,dur*0.7,vol*0.08,'sine',-i*2);
+  });
+}
+
+function scheduleMusicLoop(){
+  if(!musicScheduled||!audioCtx||!musicGain)return;
+  const ac=audioCtx;
+  const now=ac.currentTime;
+  const bpm=72; // slow, relaxed
+  const beat=60/bpm;
+  const bar=beat*4;
+
+  // Calm ambient chord progression: Am - F - C - G
+  // Root notes and their harmonics
+  const chords=[
+    [220,277,330,415],   // Am: A3 C#4 E4 Ab4
+    [174,220,261,349],   // F:  F3 A3 C4 F4
+    [130,164,196,261],   // C:  C3 E3 G3 C4
+    [196,246,293,392],   // G:  G3 B3 D4 G4
+  ];
+
+  const vol=0.045;
+
+  chords.forEach((chord,ci)=>{
+    const barStart=now+ci*bar;
+    // Sustained pad chord
+    makePad(chord,barStart,bar*0.9,vol);
+    // Gentle arpeggio on top
+    chord.forEach((note,ni)=>{
+      const t=barStart+ni*beat*0.5;
+      makeNote(note*2,t,beat*0.45,vol*0.35,'sine');
+    });
+    // Bass note (sub octave, very soft)
+    makeNote(chord[0]/2,barStart,bar*0.85,vol*0.4,'sine');
+  });
+
+  // Soft high shimmer
+  const shimmerNotes=[523,659,784,1047,784,659];
+  shimmerNotes.forEach((f,i)=>{
+    makeNote(f,now+i*beat*0.66,beat*0.55,vol*0.12,'sine',Math.random()*4-2);
+  });
+
+  // Schedule next loop
+  const loopDur=bar*4;
+  setTimeout(()=>{if(musicScheduled)scheduleMusicLoop()},loopDur*1000-200);
 }
 
 function updateMusicVol(){if(musicGain)musicGain.gain.value=settings.volMusic/100*.4}
@@ -5583,6 +5805,7 @@ const STRINGS={
     serve:'TOCA PARA SERVIR', serveP1:'P1 TOCA PARA SERVIR', serveP2:'P2 TOCA PARA SERVIR',
     wave:'💀 OLA', gameOver:'GAME OVER', winner:'GANA', rematch:'↺ REVANCHE', menu:'☰ MENÚ',
     coins:'MONEDAS', pause:'PAUSA', resume:'▶ CONTINUAR', backMenu:'☰ MENÚ',
+    shop:'🛒 TIENDA',
   },
   en:{
     newGame:'⚡ NEW GAME', cont:'▶ CONTINUE', skins:'🎨 SKINS', ranking:'🏆 RANKING',
@@ -5598,6 +5821,7 @@ const STRINGS={
     serve:'TAP TO SERVE', serveP1:'P1 TAP TO SERVE', serveP2:'P2 TAP TO SERVE',
     wave:'💀 WAVE', gameOver:'GAME OVER', winner:'WINS', rematch:'↺ REMATCH', menu:'☰ MENU',
     coins:'COINS', pause:'PAUSE', resume:'▶ RESUME', backMenu:'☰ MENU',
+    shop:'🛒 SHOP',
   }
 };
 function t(key){return(STRINGS[settings.lang]||STRINGS.es)[key]||key}
@@ -5611,6 +5835,7 @@ function applyTranslation(){
   const rk=document.getElementById('rankingBtn');if(rk)rk.textContent=t('ranking');
   const sv=document.getElementById('survivalBtn');if(sv)sv.textContent=t('survival');
   const cfg=document.getElementById('settingsBtn');if(cfg)cfg.textContent=t('config');
+  const sh=document.getElementById('shopBtn');if(sh)sh.textContent=t('shop');
   const m1=document.getElementById('mode1p');if(m1)m1.textContent=t('mode1p');
   const m2=document.getElementById('mode2p');if(m2)m2.textContent=t('mode2p');
   // Difficulty buttons
@@ -5765,7 +5990,7 @@ function nextSurvivalWave(){
   }
 
   // Speed info for toast
-  const waveSpd=Math.round(Math.min(240+(survivalWave-1)*60, 1400));
+  const waveSpd=Math.round(Math.min(280+(survivalWave-1)*90, 2000));
   const waveColor=survivalWave>=15?'#ff2255':survivalWave>=10?'#ff4400':survivalWave>=5?'#ff9500':'#ff9500';
 
   // Escalating shake + effects
@@ -5879,15 +6104,15 @@ function drawEntryAnim(){
 ═══════════════════════════════════════════ */
 const SHOP_ITEMS=[
   // CONSUMIBLES — se guardan y activan durante partida
-  {id:'shield',    icon:'🛡️',name:'ESCUDO',      desc:'Bloquea el siguiente punto perdido', rarity:'COMÚN',     price:15, type:'consumable'},
-  {id:'speedboost',icon:'⚡', name:'NITRO',       desc:'Paleta x1.5 velocidad 30s',          rarity:'COMÚN',     price:20, type:'consumable'},
-  {id:'ballmagnet',icon:'🧲', name:'IMÁN',        desc:'Atrae la pelota 20s',                rarity:'RARO',      price:35, type:'consumable'},
-  {id:'timefreeze',icon:'❄️', name:'CRYO',        desc:'Congela al CPU 5s',                  rarity:'RARO',      price:40, type:'consumable'},
-  {id:'doublexp',  icon:'⭐', name:'2x XP',       desc:'Doble XP esta partida',              rarity:'RARO',      price:30, type:'consumable'},
-  {id:'extralife', icon:'❤️', name:'+VIDA',       desc:'Añade una vida ahora',               rarity:'RARO',      price:45, type:'consumable'},
-  {id:'superfire', icon:'🔥', name:'INFERNO+',    desc:'Activa fuego x2 duración',           rarity:'ÉPICO',     price:60, type:'consumable'},
-  {id:'timewarp',  icon:'🌀', name:'BALA LENTA',  desc:'Slow-motion 3 segundos',             rarity:'ÉPICO',     price:55, type:'consumable'},
-  {id:'tripleshot',icon:'💫', name:'TRIPLE',      desc:'3 bolas señuelo 8s',                 rarity:'ÉPICO',     price:70, type:'consumable'},
+  {id:'shield',    icon:'🛡️',name:'ESCUDO',      desc:'45% de bloquear el siguiente punto perdido', rarity:'COMÚN',     price:8,  type:'consumable'},
+  {id:'speedboost',icon:'⚡', name:'NITRO',       desc:'Acelera la pelota x3 al instante',   rarity:'COMÚN',     price:12, type:'consumable'},
+  {id:'ballmagnet',icon:'🧲', name:'IMÁN',        desc:'Atrae la pelota 20s',                rarity:'RARO',      price:18, type:'consumable'},
+  {id:'timefreeze',icon:'❄️', name:'CRYO',        desc:'Congela al CPU 5s',                  rarity:'RARO',      price:22, type:'consumable'},
+  {id:'doublexp',  icon:'⭐', name:'2x XP',       desc:'Doble XP durante 90 segundos',       rarity:'RARO',      price:25, type:'consumable'},
+  {id:'extralife', icon:'❤️', name:'+VIDA',       desc:'Añade una vida ahora',               rarity:'RARO',      price:30, type:'consumable'},
+  {id:'superfire', icon:'🔥', name:'INFERNO+',    desc:'Activa fuego x2 duración',           rarity:'ÉPICO',     price:35, type:'consumable'},
+  {id:'timewarp',  icon:'🌀', name:'DISTORSIÓN',  desc:'Distorsiona el tiempo 2 segundos — el mundo se ralentiza a tu alrededor',             rarity:'ÉPICO',     price:28, type:'consumable'},
+  {id:'tripleshot',icon:'💫', name:'CHAOS BALL',  desc:'8 bolas de colores — ¡adivina cuál es la real!', rarity:'ÉPICO',     price:40, type:'consumable'},
   // PERMANENTES — se activan en todas las partidas automáticamente
   {id:'bigpaddle', icon:'🏓', name:'PALA+20%',    desc:'Paleta +20% más grande en Supervivencia',  rarity:'ÉPICO',     price:800, type:'permanent'},
   {id:'slowcpu',   icon:'🐢', name:'CPU LENTA',   desc:'CPU -15% velocidad en Supervivencia',       rarity:'ÉPICO',     price:900, type:'permanent'},
@@ -5909,27 +6134,36 @@ const itemBoosts={
 let consumableInventory=[]; // [{id, icon, name, count}]
 let shieldActive=false;
 // Session-only boosts from consumables
-let sessionBoosts={paddleSpeed:1, paddleSpeedT:0, doubleXP:false};
+let sessionBoosts={paddleSpeed:1, paddleSpeedT:0, doubleXP:false, doubleXpT:0};
+
+// Max quantity per consumable based on importance
+const CONS_MAX={
+  shield:3,      // COMÚN — puede acumular 3
+  speedboost:2,  // COMÚN — hasta 2
+  ballmagnet:2,  // RARO — hasta 2
+  timefreeze:2,  // RARO — hasta 2
+  doublexp:2,    // RARO — hasta 2
+  extralife:1,   // RARO — solo 1 (muy valioso)
+  superfire:1,   // ÉPICO — solo 1
+  timewarp:1,    // ÉPICO — solo 1
+  tripleshot:1,  // ÉPICO — solo 1
+};
 
 function getConsumableCount(id){
   const e=consumableInventory.find(x=>x.id===id);
   return e?e.count:0;
 }
 function addConsumable(id){
-  // Only 1 consumable total in inventory at a time
-  if(consumableInventory.length>0&&!consumableInventory.find(x=>x.id===id)){
-    toast('Usa tu consumible actual primero','#ff2255');return;
-  }
   // Survival mode: ballmagnet capped at 3
   if(id==='ballmagnet'&&survivalMode&&getConsumableCount('ballmagnet')>=3){
     toast('🧲 Límite de imanes en Supervivencia (máx 3)','#ff2255');return;
   }
-  // Max 1 per consumable type
-  if(getConsumableCount(id)>=1){
-    toast('Ya tienes ese consumible','#ff2255');return;
+  const max=CONS_MAX[id]||1;
+  if(getConsumableCount(id)>=max){
+    toast(`Ya tienes el máximo de ese consumible (${max})`,'#ff2255');return;
   }
   const existing=consumableInventory.find(x=>x.id===id);
-  if(existing){existing.count=1;}
+  if(existing){existing.count++;}
   else{
     const def=SHOP_ITEMS.find(x=>x.id===id);
     if(def) consumableInventory.push({id,icon:def.icon,name:def.name,count:1});
@@ -5979,7 +6213,7 @@ function consumableAnim(id){
       }
     },
     speedboost:{
-      emoji:'⚡',label:'NITRO x1.5',c1:'#00fff7',c2:'#39ff14',
+      emoji:'⚡',label:'NITRO x3',c1:'#00fff7',c2:'#39ff14',
       run(){
         // Speed lines sweeping left to right
         for(let i=0;i<10;i++){
@@ -6081,7 +6315,7 @@ function consumableAnim(id){
       }
     },
     timewarp:{
-      emoji:'🌀',label:'SLOW-MO 3s',c1:'#b44cff',c2:'#7700cc',
+      emoji:'🌀',label:'DISTORSIÓN 2s',c1:'#b44cff',c2:'#7700cc',
       run(){
         rwFlash('rgba(180,76,255,.15)',.4);
         // Vortex spiral
@@ -6153,9 +6387,22 @@ function activateConsumable(id){
     case 'shield':
       shieldActive=true;
       break;
-    case 'speedboost':
-      sessionBoosts.paddleSpeed=1.5;sessionBoosts.paddleSpeedT=30;
+    case 'speedboost':{
+      // Multiply ball speed x3 instantly
+      ball.vx*=3;
+      ball.vy*=3;
+      nitroBoosted=true; // skip clamp once so x3 holds
+      sessionBoosts.paddleSpeed=1;sessionBoosts.paddleSpeedT=0;
+      // Spectacular effect
+      burst(ball.x,ball.y,'#00fff7',40,500);
+      burstRing(ball.x,ball.y,'#00fff7');
+      burstRing(ball.x,ball.y,'#39ff14');
+      for(let i=0;i<6;i++) spawnLightning(ball.x,ball.y,ball.x+rnd(-W*.45,W*.45),ball.y+rnd(-H*.35,H*.35),'#00fff7',8);
+      doShake(16,.3);bgPulse=1.2;bgPulseColor='#00fff7';
+      toast('⚡ NITRO — ¡BOLA x3!','#00fff7');
+      vibrate([30,10,30,10,80]);
       break;
+    }
     case 'ballmagnet':
       magnetT=Math.max(magnetT,20);
       break;
@@ -6165,6 +6412,7 @@ function activateConsumable(id){
       break;
     case 'doublexp':
       sessionBoosts.doubleXP=true;
+      sessionBoosts.doubleXpT=90; // 90 seconds
       break;
     case 'extralife':
       if(!twoPlayer){
@@ -6177,7 +6425,9 @@ function activateConsumable(id){
       fireBallActive=false;
       break;
     case 'timewarp':
-      doSlow(.2,3);
+      doSlow(.15, 999); // ultra slow — ends after 2 hits
+      spiralZoom=true; spiralHitsLeft=2; spiralT=0; spiralAngle=0;
+      bgPulse=2; bgPulseColor='#b44cff';
       break;
     case 'tripleshot':
       applyPower('multi','#ff88ff');
@@ -6190,13 +6440,13 @@ function activateConsumable(id){
 function getActiveTimer(id){
   // Returns seconds remaining for active effects
   switch(id){
-    case 'speedboost': return Math.max(0,Math.round(sessionBoosts.paddleSpeedT||0));
+    case 'speedboost': return 0; // instant effect, no timer
     case 'ballmagnet': return Math.max(0,Math.round(magnetT||0));
     case 'timefreeze': return Math.max(0,Math.round(cryoT||0));
     case 'superfire':  return Math.max(0,Math.round(fireT||0));
     case 'timewarp':   return 0; // instant
     case 'shield':     return shieldActive?-1:0; // -1 = active indefinitely
-    case 'doublexp':   return sessionBoosts.doubleXP?-1:0;
+    case 'doublexp':   return sessionBoosts.doubleXP?Math.ceil(sessionBoosts.doubleXpT):0;
     default: return 0;
   }
 }
@@ -6553,8 +6803,11 @@ function permBuyAnim(id){
 
 function buyItem(item){
   if(item.type==='permanent'&&ownedItems.has(item.id)) return;
-  if(item.type!=='permanent'&&consumableInventory.length>0){
-    toast('Usa tu consumible actual primero','#ff2255');return;
+  if(item.type!=='permanent'){
+    const max=CONS_MAX[item.id]||1;
+    if(getConsumableCount(item.id)>=max){
+      toast(`Máximo ${max} de este consumible`,'#ff2255');return;
+    }
   }
   if(coins<item.price){toast('🪙 Monedas insuficientes','#ff2255');return}
   if(item.type==='permanent'){
@@ -6577,23 +6830,22 @@ function renderShop(){
     const active=owned&&activeItems.has(item.id);
     const canAfford=coins>=item.price;
     const count=getConsumableCount(item.id);
-    const hasThis=count>0;
-    const inventoryFull=item.type!=='permanent'&&consumableInventory.length>0&&!hasThis;
+    const max=CONS_MAX[item.id]||1;
+    const atMax=item.type!=='permanent'&&count>=max;
     const cls=['shop-item',owned?(active?'owned':''):''].filter(Boolean).join(' ');
     const badge=owned
       ?`<div class="shop-item-badge owned-badge" style="background:${active?'rgba(57,255,20,.25)':'rgba(255,255,255,.1)'};color:${active?'#39ff14':'rgba(255,255,255,.4)'}">${active?'ON':'OFF'}</div>`
-      :hasThis?`<div class="shop-item-badge" style="background:rgba(255,215,0,.25);color:#ffd700">✓</div>`:'';
+      :count>0?`<div class="shop-item-badge" style="background:rgba(255,215,0,.25);color:#ffd700">${count}/${max}</div>`:'';
     let priceHtml;
     if(owned){
       priceHtml=`<button class="perm-toggle${active?'':' off'}" data-toggle-id="${item.id}">${active?'● ACTIVO':'○ INACTIVO'}</button>`;
-    }else if(hasThis){
-      priceHtml=`<div class="shop-item-price" style="color:#39ff14;font-size:9px">✓ EN INVENTARIO</div>`;
-    }else if(inventoryFull){
-      priceHtml=`<div class="shop-item-price" style="color:rgba(255,255,255,.3);font-size:9px">🔒 SLOT OCUPADO</div>`;
+    }else if(atMax){
+      priceHtml=`<div class="shop-item-price" style="color:#39ff14;font-size:9px">✓ MÁXIMO (${max})</div>`;
     }else if(!canAfford){
-      priceHtml=`<div class="shop-item-price" style="color:rgba(255,255,255,.3);text-decoration:line-through">${item.price}🪙</div><div style="font-size:8px;color:rgba(255,255,255,.25);font-family:Orbitron,monospace;letter-spacing:.06em">SIN MONEDAS</div>`;
+      priceHtml=`<div class="shop-item-price" style="color:rgba(255,255,255,.3);text-decoration:line-through">${item.price}🪙</div>`;
     }else{
-      priceHtml=`<div class="shop-item-price">${item.price}🪙</div>`;
+      const countLabel=count>0?` <span style="color:#ffd700;font-size:8px">${count}/${max}</span>`:'';
+      priceHtml=`<div class="shop-item-price">${item.price}🪙${countLabel}</div>`;
     }
     return`<div class="${cls}" data-id="${item.id}">
       ${badge}
@@ -6606,7 +6858,16 @@ function renderShop(){
   };
   container.innerHTML+=consumables.map(renderItem).join('');
   container.innerHTML+=`<div style="grid-column:1/-1;font-family:Orbitron,monospace;font-size:9px;color:rgba(255,149,0,.6);letter-spacing:.12em;padding:8px 0 4px">💀 PERMANENTES — SOLO ACTIVOS EN SUPERVIVENCIA</div>`;
-  container.innerHTML+=permanents.map(renderItem).join('');
+  container.innerHTML+=permanents.map(item=>{
+    return`<div class="shop-item" style="opacity:.45;cursor:default;position:relative;filter:grayscale(.6)" data-id="${item.id}">
+      <div class="shop-item-badge" style="background:rgba(255,149,0,.25);color:#ff9500;top:6px;right:6px;position:absolute;font-family:Orbitron,monospace;font-size:7px;font-weight:900;padding:2px 5px;border-radius:4px">🔒 PRONTO</div>
+      <div class="shop-item-icon">${item.icon}</div>
+      <div class="shop-item-name">${item.name}</div>
+      <div class="shop-item-rarity" style="color:rgba(255,149,0,.5)">${item.rarity}</div>
+      <div class="shop-item-desc" style="color:rgba(255,255,255,.3)">${item.desc}</div>
+      <div style="font-family:Orbitron,monospace;font-size:9px;font-weight:900;color:rgba(255,149,0,.6);letter-spacing:.1em;margin-top:2px">⏳ PRÓXIMAMENTE</div>
+    </div>`;
+  }).join('');
   container.querySelectorAll('.shop-item').forEach(el=>{
     // Toggle button for owned permanents
     const toggleBtn=el.querySelector('.perm-toggle');
