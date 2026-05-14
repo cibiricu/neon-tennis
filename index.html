@@ -295,7 +295,7 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;touch
 }
 .skin-card:active,.skin-card:hover{background:rgba(0,255,247,.06);border-color:rgba(0,255,247,.2)}
 .skin-card.selected{border-color:rgba(0,255,247,.45);background:rgba(0,255,247,.08)}
-.skin-card.locked{opacity:.35;cursor:default;filter:grayscale(.5)}
+.skin-card.locked{opacity:.7;cursor:default;filter:grayscale(.4)}
 .skin-icon{font-size:26px;flex:0 0 auto;line-height:1}
 .skin-info{flex:1;text-align:left;min-width:0}
 .skin-name{font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:900;margin-bottom:2px}
@@ -845,6 +845,9 @@ if('serviceWorker' in navigator){
           <span class="xp-lbl" id="xpLbl">0/10 XP</span>
         </div>
         <div class="xp-track"><div class="xp-fill" id="xpBar"></div><div class="xp-glow"></div></div>
+        <div id="hudCoins" style="display:flex;align-items:center;gap:5px;margin-top:6px;font-family:Orbitron,monospace;font-size:9px;letter-spacing:.12em;color:rgba(255,215,0,.75)">
+          <span style="font-size:11px">🪙</span><span id="hudCoinsVal">0</span>
+        </div>
       </div>
       <div class="pill-info glass" id="pillText" style="display:none">CLASSIC NEON</div>
     </div>
@@ -994,7 +997,7 @@ if('serviceWorker' in navigator){
     <div class="menu-logo">
       <div class="logo-ball-wrap"><div class="logo-ball"></div><div class="logo-ring"></div><div class="logo-ring2"></div><div class="logo-ring3"></div></div>
       <div class="menu-title">NEON TENNIS</div>
-      <div class="menu-sub">RUSH EDITION · V4</div>
+      <div class="menu-sub">RUSH EDITION · V1</div>
     </div>
 
     <!-- Stats -->
@@ -1222,44 +1225,44 @@ const doubleCoinsAdBtn=document.getElementById('doubleCoinsAdBtn');
 const SKINS=[
   {
     id:0,name:'NEON GHOST',icon:'👻',color:'#00fff7',glow:'#00fff7',trailColor:'#00fff7',
-    desc:'Starter clásico',xpReq:0,
-    power:'none',powerDesc:'Sin poder especial',
+    desc:'Starter clásico',descEn:'Classic starter',xpReq:0,
+    power:'none',powerDesc:'Sin poder especial',powerDescEn:'No special power',
     powerLabel:''
   },
   {
     id:1,name:'SOLAR FLARE',icon:'☀️',color:'#ff9500',glow:'#ffb347',trailColor:'#ff6600',
-    desc:'Arde con cada golpe',xpReq:25,
-    power:'speedBoost',powerDesc:'Golpes 20% más rápidos',
-    powerLabel:'⚡ VELOCIDAD +20%'
+    desc:'Arde con cada golpe',descEn:'Burns with every hit',xpReq:25,
+    power:'speedBoost',powerDesc:'Golpes 20% más rápidos',powerDescEn:'Hits 20% faster',
+    powerLabel:'⚡ SPEED +20%'
   },
   {
     id:2,name:'VOID WRAITH',icon:'🌑',color:'#b44cff',glow:'#cc66ff',trailColor:'#9933ff',
-    desc:'Paleta fantasma que teletransporta',xpReq:70,
-    power:'teleSnap',powerDesc:'La paleta se teletransporta al impactar',
+    desc:'Paleta fantasma que teletransporta',descEn:'Ghost paddle that teleports',xpReq:70,
+    power:'teleSnap',powerDesc:'La paleta se teletransporta al impactar',powerDescEn:'Paddle teleports on hit',
     powerLabel:'🌀 TELE-SNAP'
   },
   {
     id:3,name:'ARCTIC STORM',icon:'❄️',color:'#55ddff',glow:'#88eeff',trailColor:'#22ccff',
-    desc:'Congela al CPU al impactar perfecto',xpReq:140,
-    power:'freezeOnPerfect',powerDesc:'Perfect hit congela la CPU',
+    desc:'Congela al CPU al impactar perfecto',descEn:'Freezes CPU on perfect hit',xpReq:140,
+    power:'freezeOnPerfect',powerDesc:'Perfect hit congela la CPU',powerDescEn:'Perfect hit freezes CPU',
     powerLabel:'❄️ CRYO PERFECT'
   },
   {
     id:4,name:'COSMIC BLADE',icon:'⚔️',color:'#ff2255',glow:'#ff4477',trailColor:'#ff0033',
-    desc:'La pelota corta en diagonal extremo',xpReq:250,
-    power:'extremeSpin',powerDesc:'Spin extremo en cada golpe',
+    desc:'La pelota corta en diagonal extremo',descEn:'Ball cuts at extreme angle',xpReq:250,
+    power:'extremeSpin',powerDesc:'Spin extremo en cada golpe',powerDescEn:'Extreme spin on every hit',
     powerLabel:'⚔️ HYPER SPIN'
   },
   {
     id:5,name:'DIVINE GOLD',icon:'👑',color:'#ffd700',glow:'#ffee55',trailColor:'#ffaa00',
-    desc:'XP doble en cada punto',xpReq:420,
-    power:'doubleXP',powerDesc:'Doble XP en cada punto',
+    desc:'XP doble en cada punto',descEn:'Double XP on every point',xpReq:420,
+    power:'doubleXP',powerDesc:'Doble XP en cada punto',powerDescEn:'Double XP per point',
     powerLabel:'👑 XP ×2'
   },
   {
     id:6,name:'SINGULARITY',icon:'🌀',color:'#ffffff',glow:'#aaddff',trailColor:'#88ccff',
-    desc:'Trail arcoíris + todos los poderes activos',xpReq:666,
-    power:'rainbow',powerDesc:'Rainbow trail + poderes combinados',
+    desc:'Trail arcoíris + todos los poderes activos',descEn:'Rainbow trail + all powers active',xpReq:666,
+    power:'rainbow',powerDesc:'Rainbow trail + poderes combinados',powerDescEn:'Rainbow trail + combined powers',
     powerLabel:'🌈 RAINBOW GOD'
   }
 ];
@@ -1391,12 +1394,15 @@ const fireHoles=[];
 const fireTrail=[]; // continuous fire streak left by ball after piercing CPU paddle
 let magnetT=0;   // magnet pulls ball toward center
 let ghostT=0;    // ball becomes semi-invisible to CPU
+let fogT=0;      // niebla que tapa la pantalla (GHOST BALL)
 let multiActive=false;
 const ghostBalls=[];
 let cryoT=0,warpActive=0;
 let spiralZoom=false,spiralHitsLeft=0,spiralT=0,spiralAngle=0;
 let skinFreezeT=0;
 let cpuBallX=0;
+// Black hole (TIME WARP)
+const blackHole={active:false,t:0,phase:'none',x:0,y:0,size:0,ballAbsorbed:false};
 
 // ── GEO BOSS: appears when 2 powerups hit simultaneously ──
 const geoBoss={active:false,x:0,y:0,vx:0,vy:0,hp:7,maxHp:7,size:38,rot:0,hitFlash:0,faces:[],dead:false,deathT:0};
@@ -1547,24 +1553,31 @@ function buildSkins(){
   skinScroll.innerHTML='';
   const info=getLevelFromXP(xpTotal);
   SKINS.forEach((s,i)=>{
-    const unlocked=xpTotal>=s.xpReq;
+    const unlocked=i===0; // Solo la skin 0 (default) disponible — resto PRÓXIMAMENTE
     const card=document.createElement('div');
     card.className='skin-card'+(unlocked?'':' locked')+(selectedSkin===i?' selected':'');
 
     let reqHtml='';
     if(!unlocked){
-      reqHtml=`<span class="skin-req" style="color:${s.color};border-color:${s.color}44">${s.xpReq} XP</span>`;
+      reqHtml=`<span class="skin-req" style="color:rgba(255,149,0,.7);border-color:rgba(255,149,0,.25);font-size:7px;letter-spacing:.08em">${t('comingSoon')}</span>`;
     }else if(selectedSkin===i){
-      reqHtml=`<span class="skin-req" style="color:#39ff14;border-color:#39ff1444">✓ ACTIVO</span>`;
+      reqHtml=`<span class="skin-req" style="color:#39ff14;border-color:#39ff1444">${t('skinActive')}</span>`;
+    }else{
+      reqHtml=`<span class="skin-req" style="color:${s.color};border-color:${s.color}44">${t('skinSelect')}</span>`;
     }
 
+    const isEn=settings.lang==='en';
+    const skinDesc=i===0
+      ?(isEn?s.descEn:s.desc)
+      :(unlocked&&s.powerLabel?s.powerLabel:(isEn?s.descEn:s.desc));
+
     card.innerHTML=`
-      <div class="skin-icon">${s.icon}</div>
+      <div class="skin-icon" style="${unlocked?'':'filter:grayscale(.7);opacity:.5'}">${s.icon}</div>
       <div class="skin-info">
-        <div class="skin-name" style="color:${unlocked?s.color:'rgba(255,255,255,.4)'}">${s.name}</div>
-        <div class="skin-sub">${unlocked&&s.powerLabel?s.powerLabel:s.desc}</div>
+        <div class="skin-name" style="color:${unlocked?s.color:'rgba(255,255,255,.3)'}">${s.name}</div>
+        <div class="skin-sub" style="${unlocked?'':'opacity:.3'}">${skinDesc}</div>
       </div>
-      ${reqHtml}
+      ${unlocked?reqHtml:`<div style="position:relative"><span class="skin-req" style="color:#ff9500;border-color:rgba(255,149,0,.6);background:rgba(255,149,0,.2);font-size:9px;font-weight:900;padding:4px 8px;letter-spacing:.1em">🔒 ${t('locked').replace('🔒 ','')}</span></div>`}
     `;
     if(unlocked){
       const selectSkin=e=>{
@@ -1635,7 +1648,7 @@ const POWER_DESCS={
   turbo:'La bola sale a velocidad x2',
   fire:'Atraviesa la raqueta enemiga',
   cryo:'Congela al CPU en hielo',
-  shock:'EMP destroza toda la pista',
+  shock:'Explosiones de colores durante 5 seg — mata al boss al instante',
   warp:'Distorsión temporal 0.18x',
   magnet:'Atracción magnética total',
   ghost:'CPU completamente ciega',
@@ -1766,6 +1779,7 @@ function applyPower(effect,color){
       burstRing(ball.x,ball.y,'#ffffff');
       doShake(14,.35);
       toast('⚡ TURBO RUSH! VEL x2','#00fff7');
+      playFx('turbo');
       vibrate([40,20,40,20,80]);
       break;
     }
@@ -1783,7 +1797,7 @@ function applyPower(effect,color){
       burstRing(ball.x,ball.y,'#ff6600');
       burstRing(ball.x,ball.y,'#ff2200');
       doShake(10,.2);
-      playFx('powerup');
+      playFx('fire');
       vibrate([30,20,80,20,30]);
       break;
     }
@@ -1810,53 +1824,104 @@ function applyPower(effect,color){
       spawnLightning(court.x,cpu.y,court.x+court.w,cpu.y,'#88eeff',10);
       doShake(10,.25);
       toast('❄️ CRYO! CPU CONGELADA 2s','#55ddff');
-      playFx('powerup');
+      playFx('cryo');
       vibrate([100,50,100]); // two heavy thumps = freezing impact
       break;
     }
 
     case 'shock': {
-      // Massive EMP — CPU stunned, ball launched at extreme speed, walls electrified
-      doShake(30,.65);
-      // Wall-to-wall lightning
-      spawnLightning(court.x,court.y,court.x+court.w,court.y,'#ff00aa',10);
-      spawnLightning(court.x,court.y+court.h,court.x+court.w,court.y+court.h,'#ff00aa',10);
-      spawnLightning(court.x,court.y,court.x,court.y+court.h,'#ff2255',8);
-      spawnLightning(court.x+court.w,court.y,court.x+court.w,court.y+court.h,'#ff2255',8);
-      // Cross lightning through ball
-      spawnLightning(court.x,cpu.y,court.x+court.w,cpu.y,'#ff00aa',9);
-      // Massive particle shockwave
-      burst(W/2,H/2,'#ff2255',80,700,40);
-      for(let i=0;i<6;i++) setTimeout(()=>burstRing(W/2,H/2,'#ff00aa'),i*60);
-      // CPU knocked sideways
-      const cpuKnock=rnd(0,1)>.5?court.x+cpu.w/2:court.x+court.w-cpu.w/2;
-      cpu.x=cpuKnock;
-      // Speed boost on ball
-      ball.vx*=1.5; ball.vy*=1.4;
-      toast('💥 EMP SHOCKWAVE!','#ff2255');
-      vibrate([80,30,80,30,80,30,200]); // rapid fire then big boom
+      // SHOCKWAVE SUPREMO — explosiones de colores durante 5s + mata boss al instante
+      doShake(40, .8);
+
+      // Si hay boss activo → lo mata directamente
+      if(geoBoss.active){
+        geoBoss.hp = 0;
+        geoBoss.dead = true;
+        geoBoss.deathT = 0;
+        const bc = geoBoss.color || '#ff2255';
+        const sides = geoBoss.sides || 6;
+        for(let i = 0; i < sides; i++){
+          setTimeout(()=>{
+            burstRing(geoBoss.x, geoBoss.y, hslSafe(Math.round(i/sides*360),100,65));
+            burst(geoBoss.x, geoBoss.y, hslSafe(Math.round(i/sides*360),100,65), 20, 500);
+          }, i*60);
+        }
+        [[0,0],[W,0],[0,H],[W,H]].forEach(([cx,cy])=>
+          spawnLightning(geoBoss.x, geoBoss.y, cx, cy, bc, 10));
+        doShake(30,.6); bgPulse=1.5; bgPulseColor=bc;
+        const swCoins=1+Math.floor(Math.random()*3);
+        setTimeout(()=>addCoins(swCoins,geoBoss.x,geoBoss.y),300);
+        toast(`💥 SHOCKWAVE — ${geoBoss.name} ELIMINADO! +${swCoins}🪙`, '#ff2255');
+        playFx('boss');
+      } else {
+        toast('💥 SHOCKWAVE SUPREMO!','#ff2255');
+      }
+      playFx('shock');
+
+      // Relámpagos en los bordes
+      spawnLightning(court.x, court.y, court.x+court.w, court.y, '#ff00aa', 10);
+      spawnLightning(court.x, court.y+court.h, court.x+court.w, court.y+court.h, '#ff00aa', 10);
+      spawnLightning(court.x, court.y, court.x, court.y+court.h, '#ff2255', 8);
+      spawnLightning(court.x+court.w, court.y, court.x+court.w, court.y+court.h, '#ff2255', 8);
+      spawnLightning(court.x, cpu.y, court.x+court.w, cpu.y, '#ff00aa', 9);
+
+      // CPU desplazado
+      const cpuKnock = rnd(0,1)>.5 ? court.x+cpu.w/2 : court.x+court.w-cpu.w/2;
+      cpu.x = cpuKnock;
+
+      // Aceleración de pelota
+      ball.vx *= 1.5; ball.vy *= 1.4;
+
+      // ── EXPLOSIONES CONTINUAS 5 SEGUNDOS ──
+      const COLORS = ['#ff2255','#ff6600','#ffdd00','#39ff14','#00e5ff','#b44cff','#ff88ff','#ffffff'];
+      const totalMs = 5000;
+      const interval = 180; // cada 180ms una nueva explosión
+      const count = Math.floor(totalMs / interval);
+      for(let i = 0; i < count; i++){
+        setTimeout(()=>{
+          const c1 = COLORS[Math.floor(Math.random()*COLORS.length)];
+          const c2 = COLORS[Math.floor(Math.random()*COLORS.length)];
+          const ex = court.x + Math.random()*court.w;
+          const ey = court.y + Math.random()*court.h;
+          burst(ex, ey, c1, 22, 380);
+          burstRing(ex, ey, c2);
+          if(Math.random()<.35){
+            const ex2 = court.x + Math.random()*court.w;
+            const ey2 = court.y + Math.random()*court.h;
+            burst(ex2, ey2, c2, 16, 300);
+          }
+          if(Math.random()<.2){
+            spawnLightning(ex, ey,
+              court.x+Math.random()*court.w,
+              court.y+Math.random()*court.h, c1, 5);
+          }
+          // pulso de fondo con colores
+          bgPulse = .6; bgPulseColor = c1;
+        }, i * interval);
+      }
+
+      vibrate([80,30,80,30,80,30,200]);
       break;
     }
 
     case 'warp': {
-      // Time warp: extreme slow-mo, rainbow everything, gravity reversal briefly
-      warpActive=3.5; doSlow(0.18,2.0); rainbowT=4;
-      // Dimensional tear effect — starburst
-      for(let i=0;i<70;i++){
-        const ang=i/70*Math.PI*2, r=rnd(10,140);
-        const hue=Math.round(i/70*360);
-        particles.push({
-          x:ball.x+Math.cos(ang)*r, y:ball.y+Math.sin(ang)*r,
-          vx:Math.cos(ang)*rnd(40,250), vy:Math.sin(ang)*rnd(40,250),
-          life:rnd(.6,1.4),color:hslSafe(hue,100,65),size:rnd(1,5),gravity:0,type:'ci'
-        });
-      }
-      for(let i=0;i<4;i++) setTimeout(()=>burstRing(ball.x,ball.y,hslSafe(i*90,100,65)),i*120);
-      // Rainbow lightning
-      for(let i=0;i<4;i++) spawnLightning(ball.x,ball.y,ball.x+rnd(-150,150),rnd(court.y,court.y+court.h),hslSafe(i*90,100,65),7);
-      doShake(8,.2);
-      toast('🌀 TIME WARP! 0.18x SPEED','#cc66ff');
-      vibrate([20,15,20,15,20,15,20,15,100]); // rapid ticks then long hum
+      // BLACK HOLE — aparece en el centro, atrae la pelota, la absorbe y la relanza
+      rainbowT = 4;
+      doSlow(0.12, 0.8); // ralentiza brevemente mientras aparece el agujero
+      doShake(6, .15);
+
+      // Inicializa el agujero negro
+      blackHole.active = true;
+      blackHole.t = 0;
+      blackHole.phase = 'grow';  // grow → pull → absorb → vanish → relaunch
+      blackHole.x = W / 2;
+      blackHole.y = court.y + court.h / 2;
+      blackHole.size = 0;
+      blackHole.ballAbsorbed = false;
+
+      toast('🌀 AGUJERO NEGRO!', '#b44cff');
+      playFx('warp');
+      vibrate([20,15,20,15,20,15,20,15,100]);
       break;
     }
 
@@ -1877,30 +1942,37 @@ function applyPower(effect,color){
       }
       doShake(8,.2);
       toast('🧲 MAGNET FIELD! 4s','#ffdd00');
+      playFx('magnet');
       vibrate([60,40,60]); // two magnetic pulls
       break;
     }
 
     case 'ghost': {
-      // Ghost ball: ball becomes nearly invisible, CPU error increases massively
-      ghostT=4.5;
-      doSlow(0.6,.25);
-      // Ghost dissolve effect
-      for(let i=0;i<50;i++){
-        const ang=rnd(0,Math.PI*2), r=rnd(0,ball.r*3);
+      // GHOST BALL: niebla/humo cubre la pantalla 2.5s — CPU ciega
+      ghostT = 4.5;
+      fogT = 2.5;
+      doShake(5, .1);
+      // Partículas de humo desde los bordes
+      for(let i=0;i<60;i++){
+        const fromEdge = Math.random();
+        let sx, sy;
+        if(fromEdge < .25){ sx=rnd(court.x,court.x+court.w); sy=court.y; }
+        else if(fromEdge < .5){ sx=rnd(court.x,court.x+court.w); sy=court.y+court.h; }
+        else if(fromEdge < .75){ sx=court.x; sy=rnd(court.y,court.y+court.h); }
+        else { sx=court.x+court.w; sy=rnd(court.y,court.y+court.h); }
+        const cx=W/2, cy=H/2;
         particles.push({
-          x:ball.x+Math.cos(ang)*r, y:ball.y+Math.sin(ang)*r,
-          vx:Math.cos(ang)*rnd(30,180), vy:Math.sin(ang)*rnd(30,180),
-          life:rnd(.5,1.0),color:i%2===0?'#aaffee':'#ffffff',
-          size:rnd(1.5,5),gravity:0,type:'ci'
+          x:sx, y:sy,
+          vx:(cx-sx)*rnd(.4,.9)+rnd(-30,30),
+          vy:(cy-sy)*rnd(.4,.9)+rnd(-30,30),
+          life:rnd(1.8,2.5),
+          color:i%3===0?'rgba(180,220,200,.18)':i%3===1?'rgba(200,200,220,.14)':'rgba(160,200,180,.12)',
+          size:rnd(28,60), gravity:0, type:'fog'
         });
       }
-      burstRing(ball.x,ball.y,'#aaffee');
-      burstRing(ball.x,ball.y,'rgba(200,255,240,.3)');
-      spawnLightning(ball.x,ball.y,ball.x+rnd(-60,60),ball.y+rnd(-60,60),'#aaffee',5);
-      doShake(6,.15);
-      toast('👁 GHOST BALL! CPU CIEGA 4s','#aaffee');
-      vibrate([15,10,15,10,15]); // light eerie taps
+      toast('👁 NIEBLA FANTASMA! 2.5s','#aaffee');
+      playFx('ghost');
+      vibrate([15,10,15,10,15]);
       break;
     }
 
@@ -1935,6 +2007,7 @@ function applyPower(effect,color){
       },i*50);
       doShake(14,.3);bgPulse=1.2;bgPulseColor=skinCol;
       toast('💫 CHAOS BALL — ¡ADIVINA CUÁL!','#ff88ff');
+      playFx('multi');
       vibrate([60,20,60,20,120]);
       break;
     }
@@ -2063,13 +2136,13 @@ function addXP(base){
     }
   }
 
-  // Skin unlocks
-  SKINS.forEach(sk=>{
-    if(xpTotal>=sk.xpReq&&prevXP<sk.xpReq&&!unlockedShown.has(sk.id)){
-      unlockedShown.add(sk.id);
-      setTimeout(()=>showUnlock(sk),500);
-    }
-  });
+  // Skin unlocks — desactivado mientras las skins estén bloqueadas (próximamente)
+  // SKINS.forEach(sk=>{
+  //   if(xpTotal>=sk.xpReq&&prevXP<sk.xpReq&&!unlockedShown.has(sk.id)){
+  //     unlockedShown.add(sk.id);
+  //     setTimeout(()=>showUnlock(sk),500);
+  //   }
+  // });
 
   bgPulse=.5;bgPulseColor=curSkin().color;
   save();
@@ -2317,6 +2390,7 @@ function updateGeoBoss(dt){
   if(dist<geoBoss.size+ball.r){
     geoBoss.hp--;
     geoBoss.hitFlash=1;
+    playFx('glass');
     const aliveFaces=geoBoss.faces.filter(f=>f.alive);
     if(aliveFaces.length>0){
       const deadFace=aliveFaces[Math.floor(Math.random()*aliveFaces.length)];
@@ -2349,7 +2423,10 @@ function updateGeoBoss(dt){
       doShake(26,.6);
       vibrate([120,60,120,60,120,60,300]);
       bgPulse=1.5;bgPulseColor=c;
-      toast(`💥 ${geoBoss.name} DESTRUIDO!`,c);
+      // Monedas aleatorias 1-3
+      const bossCoins=1+Math.floor(Math.random()*3);
+      setTimeout(()=>addCoins(bossCoins,geoBoss.x,geoBoss.y),300);
+      toast(`💥 ${geoBoss.name} DESTRUIDO! +${bossCoins}🪙`,c);
       playFx('boss');
     }
   }
@@ -2878,10 +2955,94 @@ function update(dt){
   }
   if(cryoT>0)cryoT-=dt;
   if(warpActive>0)warpActive-=dt;
+
+  // ── BLACK HOLE UPDATE ──
+  if(blackHole.active){
+    blackHole.t += dt;
+    const bh = blackHole;
+    if(bh.phase === 'grow'){
+      // Crece durante 0.7s
+      bh.size = Math.min(bh.t / 0.7 * 52, 52);
+      // Partículas orbitando hacia el centro
+      if(Math.random() < .6){
+        const ang = Math.random()*Math.PI*2;
+        const r = 60 + Math.random()*80;
+        const hue = Math.round(Math.random()*360);
+        particles.push({
+          x: bh.x + Math.cos(ang)*r, y: bh.y + Math.sin(ang)*r,
+          vx: -Math.cos(ang)*rnd(60,180), vy: -Math.sin(ang)*rnd(60,180),
+          life: rnd(.3,.7), color: hslSafe(hue,100,65), size: rnd(1,4), gravity:0, type:'ci'
+        });
+      }
+      if(bh.t >= 0.7){ bh.phase = 'pull'; bh.t = 0; }
+    } else if(bh.phase === 'pull'){
+      // Atrae la pelota durante 0.8s
+      const dx = bh.x - ball.x, dy = bh.y - ball.y;
+      const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+      const force = 1400 / dist;
+      ball.vx += (dx/dist)*force*dt*6;
+      ball.vy += (dy/dist)*force*dt*6;
+      // Partículas espirales intensas
+      if(Math.random() < .8){
+        const ang = Math.random()*Math.PI*2;
+        const r = 20 + Math.random()*100;
+        const hue = 260 + Math.random()*80;
+        particles.push({
+          x: bh.x + Math.cos(ang)*r, y: bh.y + Math.sin(ang)*r,
+          vx: -Math.cos(ang)*rnd(80,220) + (-dy/dist)*60,
+          vy: -Math.sin(ang)*rnd(80,220) + (dx/dist)*60,
+          life: rnd(.2,.5), color: hslSafe(hue,100,75), size: rnd(1,5), gravity:0, type:'ci'
+        });
+      }
+      // Si la pelota está cerca, absorberla
+      if(dist < bh.size + ball.r + 10){
+        bh.ballAbsorbed = true;
+        bh.phase = 'absorb'; bh.t = 0;
+        ball.vx = 0; ball.vy = 0;
+        ball.x = bh.x; ball.y = bh.y;
+      } else if(bh.t >= 0.8){ bh.phase = 'absorb'; bh.t = 0; bh.ballAbsorbed = false; }
+    } else if(bh.phase === 'absorb'){
+      // Pulso de absorción 0.4s
+      ball.x = bh.x; ball.y = bh.y; ball.vx = 0; ball.vy = 0;
+      bh.size = 52 * (1 - bh.t/0.4);
+      for(let i=0;i<3;i++){
+        const ang = Math.random()*Math.PI*2;
+        particles.push({
+          x: bh.x+Math.cos(ang)*rnd(5,30), y: bh.y+Math.sin(ang)*rnd(5,30),
+          vx: -Math.cos(ang)*rnd(100,300), vy: -Math.sin(ang)*rnd(100,300),
+          life: rnd(.2,.4), color: hslSafe(Math.round(Math.random()*360),100,80), size: rnd(2,6), gravity:0, type:'ci'
+        });
+      }
+      if(bh.t >= 0.4){ bh.phase = 'relaunch'; bh.t = 0; }
+    } else if(bh.phase === 'relaunch'){
+      // Relanza la pelota en posición aleatoria a alta velocidad
+      const sides = ['left','right','top'];
+      const side = sides[Math.floor(Math.random()*sides.length)];
+      if(side==='left'){ ball.x=court.x+ball.r+10; ball.y=court.y+court.h*(.3+Math.random()*.4); ball.vx=rnd(420,580); ball.vy=rnd(-300,300); }
+      else if(side==='right'){ ball.x=court.x+court.w-ball.r-10; ball.y=court.y+court.h*(.3+Math.random()*.4); ball.vx=rnd(-580,-420); ball.vy=rnd(-300,300); }
+      else { ball.x=court.x+court.w*(.2+Math.random()*.6); ball.y=court.y+ball.r+10; ball.vx=rnd(-250,250); ball.vy=rnd(420,580); }
+      // Explosión de salida épica
+      for(let i=0;i<60;i++){
+        const ang=i/60*Math.PI*2;
+        const hue=Math.round(i/60*360);
+        particles.push({
+          x:ball.x,y:ball.y,
+          vx:Math.cos(ang)*rnd(80,400), vy:Math.sin(ang)*rnd(80,400),
+          life:rnd(.5,1.2), color:hslSafe(hue,100,70), size:rnd(2,6), gravity:0, type:'ci'
+        });
+      }
+      for(let i=0;i<5;i++) burstRing(ball.x, ball.y, hslSafe(i*72,100,65));
+      spawnLightning(ball.x,ball.y,bh.x,bh.y,'#b44cff',8);
+      doShake(18,.4);
+      bgPulse=1.2; bgPulseColor='#b44cff';
+      bh.active=false; bh.phase='none';
+    }
+  }
   if(spiralZoom){spiralT+=dt;spiralAngle+=dt*1.8;}
   if(rainbowT>0)rainbowT-=dt;
   if(magnetT>0)magnetT-=dt;
   if(ghostT>0)ghostT-=dt;
+  if(fogT>0)fogT-=dt;
   if(skinFreezeT>0)skinFreezeT-=dt;
   flickerT+=dt*2.6;
 
@@ -3100,6 +3261,19 @@ function update(dt){
     }else if(fireT>0){
       fireBallActive=false; // ball heading down — not piercing this bounce
     }
+
+    // MAGNET: si el imán acaba de terminar o queda poco, impulso extra para que no salga lenta
+    if(magnetT>0 && magnetT<1.2){
+      const spd=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
+      const minSpd=survivalMode?320:260;
+      if(spd<minSpd){
+        const r=minSpd/Math.max(spd,1);
+        ball.vx*=r; ball.vy*=r;
+      }
+      magnetT=0; // apaga el imán en este golpe
+      burst(ball.x,ball.y,'#ffdd00',18,300);
+    }
+
     clampBallSpeed();
 
     if(perfect){
@@ -3528,6 +3702,60 @@ function drawCourt(){
     ctx.globalAlpha=1;
   }
 
+  // ── DRAW BLACK HOLE ──
+  if(blackHole.active && blackHole.size > 0){
+    const bh = blackHole;
+    const s = bh.size;
+    ctx.save();
+    // Distorsión gravitacional — anillos de lente
+    for(let ring=4; ring>=1; ring--){
+      const r = s*(0.8+ring*0.55);
+      const alpha = 0.08 + (flickerT%1)*0.04;
+      ctx.beginPath(); ctx.arc(bh.x, bh.y, r, 0, Math.PI*2);
+      const hue = (Math.round(flickerT*60) + ring*40) % 360;
+      ctx.strokeStyle = hslSafe(hue, 100, 65);
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = alpha * (5-ring)/4;
+      ctx.shadowBlur = shadowQ(12); ctx.shadowColor = hslSafe(hue,100,65);
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+    // Disco de acreción (anillo brillante giratorio)
+    const accRot = flickerT * 2.5;
+    for(let i=0;i<24;i++){
+      const ang = accRot + i/24*Math.PI*2;
+      const r1 = s*1.1, r2 = s*1.55;
+      const hue = Math.round(i/24*360);
+      const alpha = 0.6+0.4*Math.sin(flickerT*8+i);
+      ctx.beginPath();
+      ctx.arc(bh.x, bh.y, (r1+r2)/2, ang, ang + Math.PI/14);
+      ctx.strokeStyle = hslSafe(hue,100,75);
+      ctx.lineWidth = (r2-r1)*0.6;
+      ctx.globalAlpha = alpha * 0.7;
+      ctx.shadowBlur = shadowQ(16); ctx.shadowColor = hslSafe(hue,100,75);
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+    // Núcleo — negro puro
+    const coreGrad = ctx.createRadialGradient(bh.x,bh.y,0,bh.x,bh.y,s);
+    coreGrad.addColorStop(0,'rgba(0,0,0,1)');
+    coreGrad.addColorStop(0.7,'rgba(0,0,0,0.95)');
+    coreGrad.addColorStop(1,'rgba(30,0,60,0)');
+    ctx.fillStyle=coreGrad;
+    ctx.shadowBlur=0;
+    ctx.beginPath(); ctx.arc(bh.x,bh.y,s,0,Math.PI*2);
+    ctx.fill();
+    // Brillo interno violeta pulsante
+    const pulse = 0.3+0.2*Math.sin(flickerT*12);
+    ctx.globalAlpha=pulse;
+    ctx.beginPath(); ctx.arc(bh.x,bh.y,s*0.35,0,Math.PI*2);
+    ctx.fillStyle='rgba(180,80,255,0.8)';
+    ctx.shadowBlur=shadowQ(20); ctx.shadowColor='#b44cff';
+    ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.restore();
+  }
+
   // Center net
   ctx.save();
   ctx.shadowBlur=14;ctx.shadowColor=th.line;
@@ -3824,13 +4052,66 @@ function drawParticles(){
   const pShadow=settings.quality==='low'?0:settings.quality==='high'?12:7;
   particles.forEach(p=>{
     const a=Math.max(0,p.life);
-    ctx.globalAlpha=Math.min(a,1);
-    ctx.shadowBlur=pShadow;ctx.shadowColor=p.color;
-    ctx.fillStyle=p.color;
-    if(p.type==='sq'){ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}
-    else{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()}
+    if(p.type==='fog'){
+      // Partícula de humo — blob suave sin shadowBlur
+      ctx.globalAlpha=Math.min(a*.5,.45);
+      ctx.shadowBlur=0;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+    } else {
+      ctx.globalAlpha=Math.min(a,1);
+      ctx.shadowBlur=pShadow;ctx.shadowColor=p.color;
+      ctx.fillStyle=p.color;
+      if(p.type==='sq'){ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size)}
+      else{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()}
+    }
   });
   ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+
+function drawFog(){
+  if(fogT<=0) return;
+  // Fade in rápido (0–0.3s), opaco (0.3–2s), fade out (2–2.5s)
+  const total=2.5;
+  const elapsed=total-fogT;
+  let alpha;
+  if(elapsed<0.35) alpha=elapsed/0.35;
+  else if(fogT>0.5) alpha=1;
+  else alpha=fogT/0.5;
+  alpha=Math.min(alpha,1)*0.88;
+
+  ctx.save();
+  // Capa base verde-grisácea
+  ctx.globalAlpha=alpha*0.82;
+  const fogGrad=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.8);
+  fogGrad.addColorStop(0,'rgba(160,210,185,.95)');
+  fogGrad.addColorStop(0.4,'rgba(140,190,165,.9)');
+  fogGrad.addColorStop(1,'rgba(100,150,130,.85)');
+  ctx.fillStyle=fogGrad;
+  ctx.fillRect(0,0,W,H);
+
+  // Vetas de niebla animadas
+  ctx.globalAlpha=alpha*0.22;
+  for(let i=0;i<5;i++){
+    const ox=Math.sin(flickerT*0.7+i*1.3)*W*0.18;
+    const oy=Math.cos(flickerT*0.5+i*0.9)*H*0.12;
+    const vg=ctx.createRadialGradient(W/2+ox,H/2+oy,10,W/2+ox,H/2+oy,W*0.45);
+    vg.addColorStop(0,'rgba(220,255,235,.7)');
+    vg.addColorStop(1,'rgba(220,255,235,0)');
+    ctx.fillStyle=vg;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // Viñeta oscura en los bordes para profundidad
+  ctx.globalAlpha=alpha*0.35;
+  const vignette=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.8);
+  vignette.addColorStop(0,'rgba(0,0,0,0)');
+  vignette.addColorStop(1,'rgba(0,30,20,.8)');
+  ctx.fillStyle=vignette;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.globalAlpha=1;
+  ctx.restore();
 }
 
 function drawRings(){
@@ -4647,8 +4928,9 @@ function render(ts){
     drawFireTrail();
     drawGeoBoss();
     drawBombEffects();
-    drawBall();
+    if(!(blackHole.active && (blackHole.phase==='absorb'||blackHole.phase==='relaunch'))) drawBall();
     drawParticles();
+    drawFog();
     drawServeHint();
     drawLevelUp();
   }
@@ -4755,7 +5037,8 @@ function startSession(){
   geoBoss.active=false;geoBoss.dead=false;
   triggeredBossLvls=new Set();announcedPowerLvls=new Set();
   cryoT=0;warpActive=0;rainbowT=0;
-  magnetT=0;ghostT=0;multiActive=false;skinFreezeT=0;
+  blackHole.active=false;blackHole.phase='none';blackHole.size=0;
+  magnetT=0;ghostT=0;fogT=0;multiActive=false;skinFreezeT=0;
   gameoverActive=false;lifeFlash=0;
   sessionCoinsEarned=0;gameOverReviveUsed=false;gameOverDoubleUsed=false;
   if(reviveAdBtn)reviveAdBtn.classList.remove('used');
@@ -4776,6 +5059,7 @@ function startSession(){
   // Start entry animation (sets STATE='entry' then 'play')
   startEntryAnimation();
   initAudio();
+  startMusic('game');
   startRecording();
   updateCoinsUI();
 }
@@ -4996,6 +5280,7 @@ function goToMenu(){
   saveShopData();
 
   STATE='menu';contLabel();updateCoinsUI();
+  startMusic('menu');
 }
 
 menuBtn.addEventListener('click',goToMenu);
@@ -5109,7 +5394,7 @@ function initAudio(){
   const ac=getAudioCtx();
   musicGain=ac.createGain();musicGain.gain.value=settings.volMusic/100*.4;musicGain.connect(ac.destination);
   fxGain=ac.createGain();fxGain.gain.value=settings.volFx/100*.6;fxGain.connect(ac.destination);
-  startMusic();
+  startMusic('menu');
 }
 
 function playFx(type){
@@ -5118,6 +5403,27 @@ function playFx(type){
   const g=ac.createGain();g.connect(fxGain);
   const o=ac.createOscillator();o.connect(g);
   const now=ac.currentTime;
+
+  // Helper: quick noise burst (for impacts/explosions)
+  function noiseBurst(dur,vol){
+    const buf=ac.createBuffer(1,ac.sampleRate*dur,ac.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    const src=ac.createBufferSource();src.buffer=buf;
+    const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=800;f.Q.value=0.5;
+    const ng=ac.createGain();ng.gain.setValueAtTime(vol,now);ng.gain.exponentialRampToValueAtTime(.001,now+dur);
+    src.connect(f);f.connect(ng);ng.connect(fxGain);src.start(now);
+  }
+  // Helper: layered oscillators
+  function layerOsc(specs){
+    specs.forEach(({type,freq,freqEnd,start,dur,vol,shape='sine'})=>{
+      const lo=ac.createOscillator();const lg=ac.createGain();lo.connect(lg);lg.connect(fxGain);
+      lo.type=shape;lo.frequency.setValueAtTime(freq,now+start);
+      if(freqEnd)lo.frequency.exponentialRampToValueAtTime(freqEnd,now+start+dur);
+      lg.gain.setValueAtTime(vol,now+start);lg.gain.exponentialRampToValueAtTime(.001,now+start+dur);
+      lo.start(now+start);lo.stop(now+start+dur+.01);
+    });
+  }
+
   switch(type){
     case 'hit':
       o.type='square';o.frequency.setValueAtTime(220,now);o.frequency.exponentialRampToValueAtTime(110,now+.05);
@@ -5155,17 +5461,154 @@ function playFx(type){
       o.type='sawtooth';o.frequency.setValueAtTime(110,now);o.frequency.exponentialRampToValueAtTime(55,now+.3);
       g.gain.setValueAtTime(.5,now);g.gain.exponentialRampToValueAtTime(.001,now+.35);
       o.start(now);o.stop(now+.35);break;
+
+    // ══ POWER-UPS ══
+
+    case 'turbo': // ⚡ TURBO RUSH — aceleración eléctrica ascendente
+      layerOsc([
+        {freq:200,freqEnd:1800,start:0,dur:.18,vol:.35,shape:'sawtooth'},
+        {freq:400,freqEnd:3200,start:.04,dur:.15,vol:.2,shape:'square'},
+      ]);
+      o.start(now);o.stop(now);break; // dummy stop
+
+    case 'fire': // 🔥 INFERNO — explosión grave + crackle
+      noiseBurst(.22,.4);
+      layerOsc([
+        {freq:80,freqEnd:40,start:0,dur:.25,vol:.4,shape:'sawtooth'},
+        {freq:180,freqEnd:60,start:.05,dur:.2,vol:.25,shape:'square'},
+      ]);
+      o.start(now);o.stop(now);break;
+
+    case 'cryo': // ❄️ CRYO BLAST — cristalino descendente + shimmer
+      layerOsc([
+        {freq:1800,freqEnd:400,start:0,dur:.35,vol:.3,shape:'sine'},
+        {freq:2400,freqEnd:600,start:.05,dur:.3,vol:.15,shape:'triangle'},
+        {freq:3200,freqEnd:800,start:.1,dur:.25,vol:.1,shape:'sine'},
+      ]);
+      o.start(now);o.stop(now);break;
+
+    case 'shock': // 💥 SHOCKWAVE — EMP explosión + buzz eléctrico
+      noiseBurst(.15,.5);
+      layerOsc([
+        {freq:60,freqEnd:30,start:0,dur:.3,vol:.5,shape:'sawtooth'},
+        {freq:440,freqEnd:55,start:.02,dur:.25,vol:.3,shape:'square'},
+        {freq:880,freqEnd:110,start:.04,dur:.2,vol:.15,shape:'sawtooth'},
+      ]);
+      o.start(now);o.stop(now);break;
+
+    case 'warp': // 🌀 TIME WARP — efecto de succión/distorsión gravitacional
+      layerOsc([
+        {freq:800,freqEnd:60,start:0,dur:.8,vol:.35,shape:'sine'},
+        {freq:1200,freqEnd:80,start:.1,dur:.7,vol:.2,shape:'triangle'},
+        {freq:400,freqEnd:40,start:.2,dur:.6,vol:.15,shape:'sawtooth'},
+      ]);
+      o.start(now);o.stop(now);break;
+
+    case 'magnet': // 🧲 MAGNET — pulso eléctrico magnético
+      [0,.08,.16,.24,.32].forEach((t,i)=>{
+        const mo=ac.createOscillator();const mg=ac.createGain();mo.connect(mg);mg.connect(fxGain);
+        mo.type='sine';mo.frequency.value=220+i*80;
+        mg.gain.setValueAtTime(.25,now+t);mg.gain.exponentialRampToValueAtTime(.001,now+t+.1);
+        mo.start(now+t);mo.stop(now+t+.12);
+      });
+      o.start(now);o.stop(now);break;
+
+    case 'ghost': // 👁️ GHOST — niebla etérea, sweep fantasmal
+      layerOsc([
+        {freq:300,freqEnd:150,start:0,dur:.6,vol:.2,shape:'sine'},
+        {freq:600,freqEnd:200,start:.1,dur:.5,vol:.12,shape:'triangle'},
+        {freq:1200,freqEnd:300,start:.2,dur:.4,vol:.08,shape:'sine'},
+      ]);
+      noiseBurst(.5,.08);
+      o.start(now);o.stop(now);break;
+
+    case 'multi': // 💫 MULTI BALL — spawn caótico de bolas
+      [0,.06,.12,.18,.24,.3].forEach((t,i)=>{
+        const mo=ac.createOscillator();const mg=ac.createGain();mo.connect(mg);mg.connect(fxGain);
+        mo.type='sine';mo.frequency.value=[523,659,784,1047,1319,1568][i];
+        mg.gain.setValueAtTime(.22,now+t);mg.gain.exponentialRampToValueAtTime(.001,now+t+.12);
+        mo.start(now+t);mo.stop(now+t+.14);
+      });
+      o.start(now);o.stop(now);break;
+
+    // ══ CONSUMIBLES ══
+
+    case 'snd_shield': // 🛡️ ESCUDO — impacto metálico protector
+      layerOsc([
+        {freq:440,freqEnd:880,start:0,dur:.08,vol:.4,shape:'square'},
+        {freq:660,freqEnd:1320,start:.04,dur:.1,vol:.25,shape:'triangle'},
+        {freq:880,freqEnd:440,start:.08,dur:.2,vol:.15,shape:'sine'},
+      ]);
+      o.start(now);o.stop(now);break;
+
+    case 'snd_timewarp': // ⏳ DISTORSIÓN — reloj distorsionado
+      layerOsc([
+        {freq:500,freqEnd:250,start:0,dur:.5,vol:.3,shape:'sine'},
+        {freq:750,freqEnd:125,start:.05,dur:.45,vol:.2,shape:'triangle'},
+        {freq:1000,freqEnd:80,start:.1,dur:.4,vol:.1,shape:'sawtooth'},
+      ]);
+      o.start(now);o.stop(now);break;
+
+    case 'snd_nitro': // 🚀 NITRO — aceleración de cohete
+      layerOsc([
+        {freq:100,freqEnd:2000,start:0,dur:.25,vol:.45,shape:'sawtooth'},
+        {freq:200,freqEnd:3000,start:.05,dur:.2,vol:.25,shape:'square'},
+      ]);
+      noiseBurst(.18,.2);
+      o.start(now);o.stop(now);break;
+
+    case 'snd_magnet': // 🧲 IMÁN consumible — zumbido magnético largo
+      layerOsc([
+        {freq:80,freqEnd:160,start:0,dur:.4,vol:.35,shape:'sine'},
+        {freq:160,freqEnd:320,start:.1,dur:.35,vol:.2,shape:'triangle'},
+      ]);
+      [0,.15,.3].forEach((t)=>{
+        const mo=ac.createOscillator();const mg=ac.createGain();mo.connect(mg);mg.connect(fxGain);
+        mo.type='square';mo.frequency.value=440;
+        mg.gain.setValueAtTime(.12,now+t);mg.gain.exponentialRampToValueAtTime(.001,now+t+.08);
+        mo.start(now+t);mo.stop(now+t+.1);
+      });
+      o.start(now);o.stop(now);break;
+
+    case 'glass': { // 💎 Cristal rompiéndose — boss hit
+      // Ruido de alta frecuencia en ráfagas cortas (esquirlas)
+      const shards=[0,.015,.03,.055,.08,.11,.15,.2];
+      shards.forEach(dt=>{
+        const buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.06),ac.sampleRate);
+        const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+        const src=ac.createBufferSource();src.buffer=buf;
+        const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=4000+Math.random()*4000;
+        const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=12000;
+        const ng=ac.createGain();
+        const vol2=0.14*Math.pow(0.6,shards.indexOf(dt));
+        ng.gain.setValueAtTime(vol2,now+dt);ng.gain.exponentialRampToValueAtTime(0.001,now+dt+0.06);
+        src.connect(hp);hp.connect(lp);lp.connect(ng);ng.connect(fxGain);
+        src.start(now+dt);musicNodes.push(src);
+      });
+      // Tono cristalino descendente
+      layerOsc([
+        {freq:2800,freqEnd:800,start:0,dur:.25,vol:.12,shape:'sine'},
+        {freq:4200,freqEnd:1200,start:.02,dur:.2,vol:.08,shape:'sine'},
+        {freq:1800,freqEnd:600,start:.04,dur:.18,vol:.06,shape:'triangle'},
+      ]);
+      o.start(now);o.stop(now);break;
+    }
+
+    default:
+      o.start(now);o.stop(now+.001);break;
   }
 }
 
 /* ── BACKGROUND MUSIC — calm ambient, Web Audio ── */
 let musicScheduled=false;
 
-function startMusic(){
+function startMusic(mode='menu'){
   if(!audioCtx||!musicGain)return;
   stopMusic();
   musicScheduled=true;
-  scheduleMusicLoop();
+  currentMusicMode=mode;
+  if(mode==='game') scheduleGameMusicLoop();
+  else scheduleMenuMusicLoop();
 }
 
 function stopMusic(){
@@ -5173,6 +5616,8 @@ function stopMusic(){
   musicNodes=[];
   musicScheduled=false;
 }
+
+let currentMusicMode='menu';
 
 function makeNote(freq,startT,dur,vol,type='sine',detune=0){
   const ac=audioCtx;
@@ -5200,47 +5645,230 @@ function makePad(freqs,startT,dur,vol){
   });
 }
 
-function scheduleMusicLoop(){
-  if(!musicScheduled||!audioCtx||!musicGain)return;
+// ── MENÚ: ambient chill atmosférico ──
+function scheduleMenuMusicLoop(){
+  if(!musicScheduled||!audioCtx||!musicGain||currentMusicMode!=='menu')return;
   const ac=audioCtx;
   const now=ac.currentTime;
-  const bpm=72; // slow, relaxed
+  const bpm=72;
   const beat=60/bpm;
   const bar=beat*4;
 
-  // Calm ambient chord progression: Am - F - C - G
-  // Root notes and their harmonics
   const chords=[
-    [220,277,330,415],   // Am: A3 C#4 E4 Ab4
-    [174,220,261,349],   // F:  F3 A3 C4 F4
-    [130,164,196,261],   // C:  C3 E3 G3 C4
-    [196,246,293,392],   // G:  G3 B3 D4 G4
+    [220,277,330,415],
+    [174,220,261,349],
+    [130,164,196,261],
+    [196,246,293,392],
   ];
-
   const vol=0.045;
-
   chords.forEach((chord,ci)=>{
     const barStart=now+ci*bar;
-    // Sustained pad chord
     makePad(chord,barStart,bar*0.9,vol);
-    // Gentle arpeggio on top
     chord.forEach((note,ni)=>{
-      const t=barStart+ni*beat*0.5;
-      makeNote(note*2,t,beat*0.45,vol*0.35,'sine');
+      makeNote(note*2,barStart+ni*beat*0.5,beat*0.45,vol*0.35,'sine');
     });
-    // Bass note (sub octave, very soft)
     makeNote(chord[0]/2,barStart,bar*0.85,vol*0.4,'sine');
   });
-
-  // Soft high shimmer
-  const shimmerNotes=[523,659,784,1047,784,659];
-  shimmerNotes.forEach((f,i)=>{
+  const shimmer=[523,659,784,1047,784,659];
+  shimmer.forEach((f,i)=>{
     makeNote(f,now+i*beat*0.66,beat*0.55,vol*0.12,'sine',Math.random()*4-2);
   });
-
-  // Schedule next loop
   const loopDur=bar*4;
-  setTimeout(()=>{if(musicScheduled)scheduleMusicLoop()},loopDur*1000-200);
+  setTimeout(()=>{if(musicScheduled&&currentMusicMode==='menu')scheduleMenuMusicLoop()},loopDur*1000-200);
+}
+
+// ── JUEGO: electrónica rápida y energética ──
+function scheduleGameMusicLoop(){
+  if(!musicScheduled||!audioCtx||!musicGain||currentMusicMode!=='game')return;
+  const ac=audioCtx;
+  const now=ac.currentTime;
+  const bpm=112; // más suave, menos frenético
+  const beat=60/bpm;
+  const bar=beat*4;
+
+  // ── Kick suave ──
+  function kick(t,vol=0.14){
+    const o=ac.createOscillator();const g=ac.createGain();
+    o.connect(g);g.connect(musicGain);
+    o.type='sine';
+    o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+0.15);
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+    o.start(t);o.stop(t+0.24);musicNodes.push(o);
+  }
+
+  // ── Snare suave (menos agresivo) ──
+  function snare(t){
+    const buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.1),ac.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    const src=ac.createBufferSource();src.buffer=buf;
+    const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=1200;f.Q.value=0.8;
+    const g=ac.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+    src.connect(f);f.connect(g);g.connect(musicGain);src.start(t);musicNodes.push(src);
+  }
+
+  // ── Hi-hat suave ──
+  function hihat(t,vol=0.025){
+    const buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.035),ac.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    const src=ac.createBufferSource();src.buffer=buf;
+    const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=7000;
+    const g=ac.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.035);
+    src.connect(f);f.connect(g);g.connect(musicGain);src.start(t);musicNodes.push(src);
+  }
+
+  // ── Bass melódico (triangle, suave) ──
+  function bass(freq,t,dur,vol=0.055){
+    const o=ac.createOscillator();const g=ac.createGain();
+    const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=320;f.Q.value=1.2;
+    o.connect(f);f.connect(g);g.connect(musicGain);
+    o.type='triangle';o.frequency.value=freq;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.04);
+    g.gain.setValueAtTime(vol,t+dur*0.65);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.start(t);o.stop(t+dur+0.02);musicNodes.push(o);
+  }
+
+  // ── Melodía (sine suave + detune ligero) ──
+  function mel(freq,t,dur,vol=0.028){
+    const o=ac.createOscillator();const o2=ac.createOscillator();
+    const g=ac.createGain();
+    const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;f.Q.value=0.8;
+    o.connect(f);o2.connect(f);f.connect(g);g.connect(musicGain);
+    o.type='sine';o.frequency.value=freq;
+    o2.type='triangle';o2.frequency.value=freq*1.003;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.06);
+    g.gain.setValueAtTime(vol,t+dur*0.55);g.gain.linearRampToValueAtTime(0,t+dur);
+    o.start(t);o.stop(t+dur+0.05);o2.start(t);o2.stop(t+dur+0.05);
+    musicNodes.push(o);musicNodes.push(o2);
+  }
+
+  // ── Pad harmónico ──
+  function pad(freqs,t,dur,vol=0.018){
+    freqs.forEach((f,i)=>{
+      makeNote(f,t,dur,vol*(1-i*0.15),'sine',i*5);
+      if(i<2) makeNote(f*2,t+0.08,dur*0.8,vol*0.06,'sine',-i*3);
+    });
+  }
+
+  // ── Contrapunto arpegio ──
+  function arp(notes,t,vol=0.016){
+    notes.forEach((freq,i)=>{
+      makeNote(freq,t+i*beat*0.25,beat*0.22,vol,'sine');
+    });
+  }
+
+  // Progresión de 32 compases: 4 secciones de 8 compases
+  // Am7 → Fmaj7 → C → G (con variaciones)
+  const sections=[
+    // Sección A (compases 1-8): melodía principal
+    {
+      chords:[[220,330,392,523],[174,261,349,440],[130,196,261,392],[196,246,330,392]],
+      bassNotes:[55,87,65,98],
+      melody:[
+        // bar 0-1
+        [440,523,587,659,587,523,494,440],
+        [392,440,494,523,494,440,392,349],
+        // bar 2-3
+        [261,330,392,440,392,330,294,261],
+        [294,330,392,440,523,494,440,392],
+        // bar 4-5
+        [440,523,659,784,659,523,494,440],
+        [392,440,523,587,523,440,392,349],
+        // bar 6-7
+        [294,330,392,494,440,392,349,330],
+        [261,294,330,392,440,392,349,294],
+      ]
+    },
+    // Sección B (compases 9-16): contrapunto + variación
+    {
+      chords:[[220,277,330,440],[174,220,293,392],[130,164,220,330],[196,246,311,415]],
+      bassNotes:[55,44,65,49],
+      melody:[
+        [523,494,440,392,349,330,294,261],
+        [330,349,392,440,494,523,587,659],
+        [392,440,494,440,392,349,330,294],
+        [261,294,330,392,440,494,523,587],
+        [659,587,523,494,440,392,349,330],
+        [392,440,494,523,587,659,784,659],
+        [587,523,494,440,392,349,330,294],
+        [330,294,261,294,330,392,440,494],
+      ]
+    },
+    // Sección C (compases 17-24): más suave, pad prominente
+    {
+      chords:[[220,330,440,587],[174,261,392,523],[130,196,330,440],[196,294,392,523]],
+      bassNotes:[55,87,65,98],
+      melody:[
+        [523,587,659,784,659,587,523,494],
+        [440,494,523,587,523,494,440,392],
+        [330,392,440,494,440,392,349,330],
+        [294,330,392,440,494,523,494,440],
+        [392,440,494,523,587,659,587,523],
+        [494,440,392,349,330,294,261,294],
+        [330,392,440,523,587,659,784,659],
+        [587,523,494,440,392,349,330,294],
+      ]
+    },
+    // Sección D (compases 25-32): vuelta al tema + resolución
+    {
+      chords:[[220,330,392,523],[174,261,349,440],[130,196,261,392],[196,246,330,523]],
+      bassNotes:[55,87,65,98],
+      melody:[
+        [440,523,587,659,784,659,587,523],
+        [494,440,392,349,330,294,261,294],
+        [330,392,440,494,523,587,659,784],
+        [659,587,523,494,440,392,349,330],
+        [294,330,392,440,494,523,587,659],
+        [587,523,494,440,392,330,294,261],
+        [330,294,261,294,330,392,440,523],
+        [587,523,494,440,392,349,330,261],
+      ]
+    }
+  ];
+
+  const totalBars=32;
+  for(let b=0;b<totalBars;b++){
+    const secIdx=Math.floor(b/8);
+    const sec=sections[secIdx];
+    const barInSec=b%8;
+    const chordIdx=Math.floor(barInSec/2)%sec.chords.length;
+    const chord=sec.chords[chordIdx];
+    const bassFreq=sec.bassNotes[chordIdx];
+    const barStart=now+b*bar;
+
+    // Drums (suaves, no en cada compás — entran gradualmente)
+    if(b>=4){ // drums from bar 5
+      kick(barStart);
+      kick(barStart+beat*2);
+      if(b>=8){
+        snare(barStart+beat);
+        snare(barStart+beat*3);
+      }
+      // hihat en corcheas pero ligero
+      for(let h=0;h<8;h++) hihat(barStart+h*beat*0.5, h%2===0?0.028:0.015);
+    }
+
+    // Bass
+    bass(bassFreq,barStart,beat*1.9);
+    bass(bassFreq,barStart+beat*2,beat*0.85);
+    bass(bassFreq*1.5,barStart+beat*3,beat*0.85);
+
+    // Pad armónico
+    pad(chord,barStart,bar*0.92);
+
+    // Melodía (8 notas por compás en semicorcheas)
+    const melNotes=sec.melody[barInSec];
+    melNotes.forEach((freq,ni)=>{
+      mel(freq,barStart+ni*beat*0.5,beat*0.46);
+    });
+
+    // Arpegio contrapunto (cada 2 compases, alternado)
+    if(barInSec%2===1){
+      arp([chord[0]*2,chord[1]*2,chord[2]*2,chord[3]||chord[0]*4],barStart+beat*0.5);
+    }
+  }
+
+  const loopDur=bar*totalBars;
+  setTimeout(()=>{if(musicScheduled&&currentMusicMode==='game')scheduleGameMusicLoop()},loopDur*1000-300);
 }
 
 function updateMusicVol(){if(musicGain)musicGain.gain.value=settings.volMusic/100*.4}
@@ -5835,6 +6463,26 @@ const STRINGS={
     wave:'💀 OLA', gameOver:'GAME OVER', winner:'GANA', rematch:'↺ REVANCHE', menu:'☰ MENÚ',
     coins:'MONEDAS', pause:'PAUSA', resume:'▶ CONTINUAR', backMenu:'☰ MENÚ',
     shop:'🛒 TIENDA',
+    // Shop & items
+    shopTitle:'🛒 TIENDA', shopCoins:'MONEDAS',
+    permanentsLabel:'💀 PERMANENTES — SOLO ACTIVOS EN SUPERVIVENCIA',
+    permanentWarn:'⚠️ SOLO ACTIVO EN MODO SUPERVIVENCIA',
+    comingSoon:'⏳ PRÓXIMAMENTE', locked:'🔒 PRONTO',
+    skinActive:'✓ ACTIVO', skinSelect:'SELEC.',
+    skinStarterDesc:'Starter clásico',
+    activated:'✓ Activado en Supervivencia!',
+    activatedPerm:'✓ ACTIVO EN SUPERVIVENCIA!',
+    // Retry
+    retryBtn:'💀 REINTENTAR', retryPrice:'— 55🪙',
+    retryUsed:'— YA USADO', retryNoFunds:'— 55🪙 (sin fondos)',
+    // HUD
+    hudCoins:'MONEDAS',
+    // Toasts
+    magnetLimit:'🧲 Límite de imanes en Supervivencia (máx 3)',
+    shieldActivated:'🛡️ ¡Escudo activo!',
+    // Confirm
+    confirmBuy:'COMPRAR', confirmCancel:'CANCELAR',
+    confirmWarn:'⚠️ SOLO ACTIVO EN MODO SUPERVIVENCIA',
   },
   en:{
     newGame:'⚡ NEW GAME', cont:'▶ CONTINUE', skins:'🎨 SKINS', ranking:'🏆 RANKING',
@@ -5851,6 +6499,26 @@ const STRINGS={
     wave:'💀 WAVE', gameOver:'GAME OVER', winner:'WINS', rematch:'↺ REMATCH', menu:'☰ MENU',
     coins:'COINS', pause:'PAUSE', resume:'▶ RESUME', backMenu:'☰ MENU',
     shop:'🛒 SHOP',
+    // Shop & items
+    shopTitle:'🛒 SHOP', shopCoins:'COINS',
+    permanentsLabel:'💀 PERMANENTS — SURVIVAL ONLY',
+    permanentWarn:'⚠️ ONLY ACTIVE IN SURVIVAL MODE',
+    comingSoon:'⏳ COMING SOON', locked:'🔒 COMING SOON',
+    skinActive:'✓ ACTIVE', skinSelect:'SELECT',
+    skinStarterDesc:'Classic starter',
+    activated:'✓ ACTIVATED IN SURVIVAL!',
+    activatedPerm:'✓ ACTIVE IN SURVIVAL!',
+    // Retry
+    retryBtn:'💀 RETRY', retryPrice:'— 55🪙',
+    retryUsed:'— ALREADY USED', retryNoFunds:'— 55🪙 (no funds)',
+    // HUD
+    hudCoins:'COINS',
+    // Toasts — survival
+    magnetLimit:'🧲 Max magnets in Survival (max 3)',
+    shieldActivated:'🛡️ Shield active!',
+    // Confirm
+    confirmBuy:'BUY', confirmCancel:'CANCEL',
+    confirmWarn:'⚠️ ONLY ACTIVE IN SURVIVAL MODE',
   }
 };
 function t(key){return(STRINGS[settings.lang]||STRINGS.es)[key]||key}
@@ -5895,11 +6563,35 @@ function applyTranslation(){
   const cLbl=document.querySelector('#cScore')?.closest('.score-half')?.querySelector('.score-lbl');
   if(pLbl&&!twoPlayer)pLbl.textContent=t('you');
   if(cLbl&&!twoPlayer)cLbl.textContent=t('cpu');
+  // Shop modal title
+  const shopT=document.querySelector('.shop-title');if(shopT)shopT.textContent=t('shopTitle');
+  // Confirm modal warn
+  const cw=document.getElementById('confirmWarnTxt');if(cw)cw.textContent=t('confirmWarn');
+  // Confirm buttons
+  const confirmYes=document.getElementById('confirmYes');if(confirmYes)confirmYes.textContent=`✓ ${t('confirmBuy')}`;
+  const confirmNoBtn=document.getElementById('confirmNo');if(confirmNoBtn)confirmNoBtn.textContent=`✕ ${t('confirmCancel')}`;
+  // Retry button state
+  if(goRetryBtn&&goRetryBtn.style.display!=='none'){
+    if(survivalRetryUsed){
+      goRetryBtn.innerHTML=`${t('retryBtn')} <span style="font-size:10px;opacity:.7">${t('retryUsed')}</span>`;
+    }else if(coins<55){
+      goRetryBtn.innerHTML=`${t('retryBtn')} <span style="font-size:10px;opacity:.7">${t('retryNoFunds')}</span>`;
+    }else{
+      goRetryBtn.innerHTML=`${t('retryBtn')} <span style="font-size:11px;opacity:.8">${t('retryPrice')}</span>`;
+    }
+  }
+  // Re-render shop if open to update item names/descs
+  if(document.getElementById('shopModal')?.classList.contains('show')) renderShop();
+  // Re-render skins if open
+  const skinScroll=document.getElementById('skinScroll');
+  if(skinScroll&&skinScroll.children.length>0) buildSkins();
 }
 
 function updateCoinsUI(){
   const el=document.getElementById('coinsVal');
   if(el)el.textContent=coins;
+  const hud=document.getElementById('hudCoinsVal');
+  if(hud)hud.textContent=coins;
 }
 
 /* ═══════════════════════════════════════════
@@ -6135,12 +6827,12 @@ const SHOP_ITEMS=[
   // CONSUMIBLES — se guardan y activan durante partida
   {id:'shield',    icon:'🛡️',name:'ESCUDO',      desc:'45% de bloquear el siguiente punto perdido', rarity:'COMÚN',     price:8,  type:'consumable'},
   {id:'speedboost',icon:'⚡', name:'NITRO',       desc:'Acelera la pelota x3 al instante',   rarity:'COMÚN',     price:12, type:'consumable'},
-  {id:'ballmagnet',icon:'🧲', name:'IMÁN',        desc:'Atrae la pelota 20s',                rarity:'RARO',      price:18, type:'consumable'},
+  {id:'ballmagnet',icon:'🧲', name:'IMÁN',        desc:'Atrae la pelota 10s',                rarity:'RARO',      price:18, type:'consumable'},
   {id:'timefreeze',icon:'❄️', name:'CRYO',        desc:'Congela al CPU 5s',                  rarity:'RARO',      price:22, type:'consumable'},
   {id:'doublexp',  icon:'⭐', name:'2x XP',       desc:'Doble XP durante 90 segundos',       rarity:'RARO',      price:25, type:'consumable'},
   {id:'extralife', icon:'❤️', name:'+VIDA',       desc:'Añade una vida ahora',               rarity:'RARO',      price:30, type:'consumable'},
   {id:'superfire', icon:'🔥', name:'INFERNO+',    desc:'Activa fuego x2 duración',           rarity:'ÉPICO',     price:35, type:'consumable'},
-  {id:'timewarp',  icon:'🌀', name:'DISTORSIÓN',  desc:'Distorsiona el tiempo 2 segundos — el mundo se ralentiza a tu alrededor',             rarity:'ÉPICO',     price:28, type:'consumable'},
+  {id:'timewarp',  icon:'⏳', name:'DISTORSIÓN',  desc:'Distorsiona el tiempo 2 segundos — el mundo se ralentiza a tu alrededor',             rarity:'ÉPICO',     price:28, type:'consumable'},
   {id:'tripleshot',icon:'💫', name:'CHAOS BALL',  desc:'8 bolas de colores — ¡adivina cuál es la real!', rarity:'ÉPICO',     price:40, type:'consumable'},
   // PERMANENTES — se activan en todas las partidas automáticamente
   {id:'bigpaddle', icon:'🏓', name:'PALA+20%',    desc:'Paleta +20% más grande en Supervivencia',  rarity:'ÉPICO',     price:800, type:'permanent'},
@@ -6185,7 +6877,7 @@ function getConsumableCount(id){
 function addConsumable(id){
   // Survival mode: ballmagnet capped at 3
   if(id==='ballmagnet'&&survivalMode&&getConsumableCount('ballmagnet')>=3){
-    toast('🧲 Límite de imanes en Supervivencia (máx 3)','#ff2255');return;
+    toast(t('magnetLimit'),'#ff2255');return;
   }
   const max=CONS_MAX[id]||1;
   if(getConsumableCount(id)>=max){
@@ -6257,7 +6949,7 @@ function consumableAnim(id){
       }
     },
     ballmagnet:{
-      emoji:'🧲',label:'IMÁN 20s',c1:'#ffdd00',c2:'#ff9500',
+      emoji:'🧲',label:'IMÁN 10s',c1:'#ffdd00',c2:'#ff9500',
       run(){
         // Magnetic field rings converging to ball position
         rwFlash('rgba(255,221,0,.1)',.3);
@@ -6344,7 +7036,7 @@ function consumableAnim(id){
       }
     },
     timewarp:{
-      emoji:'🌀',label:'DISTORSIÓN 2s',c1:'#b44cff',c2:'#7700cc',
+      emoji:'⏳',label:'DISTORSIÓN 2s',c1:'#b44cff',c2:'#7700cc',
       run(){
         rwFlash('rgba(180,76,255,.15)',.4);
         // Vortex spiral
@@ -6410,7 +7102,14 @@ function consumableAnim(id){
 function activateConsumable(id){
   if(STATE!=='play'&&STATE!=='point'){toast('Solo durante la partida','#ff2255');return}
   if(!useConsumable(id))return;
-  playFx('powerup');vibrate([30,20,60]);
+  // Sonido específico por consumible
+  const consumableSounds={
+    shield:'snd_shield', speedboost:'snd_nitro', ballmagnet:'snd_magnet',
+    timewarp:'snd_timewarp', timefreeze:'cryo', tripleshot:'multi',
+    doublexp:'powerup', extralife:'powerup', superfire:'fire'
+  };
+  playFx(consumableSounds[id]||'powerup');
+  vibrate([30,20,60]);
   consumableAnim(id);
   switch(id){
     case 'shield':
@@ -6433,7 +7132,7 @@ function activateConsumable(id){
       break;
     }
     case 'ballmagnet':
-      magnetT=Math.max(magnetT,20);
+      magnetT=Math.max(magnetT,10);
       break;
     case 'timefreeze':
       cryoT=Math.max(cryoT,5);skinFreezeT=5;
@@ -6587,7 +7286,7 @@ function togglePermItem(id){
     toast('⏸ Desactivado','#aaa');
   } else {
     activeItems.add(id);
-    toast('✓ Activado en Supervivencia!','#39ff14');
+    toast(t('activated'),'#39ff14');
   }
   applyPermBoost(id); // recalc all
   saveShopData();
@@ -6606,7 +7305,7 @@ function _doBuy(item){
     applyPermBoost(item.id);
     saveShopData();resize();
     permBuyAnim(item.id);
-    toast(`✓ ${item.name} ACTIVO EN SUPERVIVENCIA!`,'#39ff14');
+    toast(`✓ ${item.name} ${t('activatedPerm')}`,'#39ff14');
   }else{
     addConsumable(item.id);
     saveShopData();
@@ -6886,15 +7585,15 @@ function renderShop(){
     </div>`;
   };
   container.innerHTML+=consumables.map(renderItem).join('');
-  container.innerHTML+=`<div style="grid-column:1/-1;font-family:Orbitron,monospace;font-size:9px;color:rgba(255,149,0,.6);letter-spacing:.12em;padding:8px 0 4px">💀 PERMANENTES — SOLO ACTIVOS EN SUPERVIVENCIA</div>`;
+  container.innerHTML+=`<div style="grid-column:1/-1;font-family:Orbitron,monospace;font-size:9px;color:rgba(255,149,0,.6);letter-spacing:.12em;padding:8px 0 4px">${t('permanentsLabel')}</div>`;
   container.innerHTML+=permanents.map(item=>{
     return`<div class="shop-item" style="opacity:.45;cursor:default;position:relative;filter:grayscale(.6)" data-id="${item.id}">
-      <div class="shop-item-badge" style="background:rgba(255,149,0,.25);color:#ff9500;top:6px;right:6px;position:absolute;font-family:Orbitron,monospace;font-size:7px;font-weight:900;padding:2px 5px;border-radius:4px">🔒 PRONTO</div>
+      <div class="shop-item-badge" style="background:rgba(255,149,0,.25);color:#ff9500;top:6px;right:6px;position:absolute;font-family:Orbitron,monospace;font-size:7px;font-weight:900;padding:2px 5px;border-radius:4px">${t('locked')}</div>
       <div class="shop-item-icon">${item.icon}</div>
       <div class="shop-item-name">${item.name}</div>
       <div class="shop-item-rarity" style="color:rgba(255,149,0,.5)">${item.rarity}</div>
       <div class="shop-item-desc" style="color:rgba(255,255,255,.3)">${item.desc}</div>
-      <div style="font-family:Orbitron,monospace;font-size:9px;font-weight:900;color:rgba(255,149,0,.6);letter-spacing:.1em;margin-top:2px">⏳ PRÓXIMAMENTE</div>
+      <div style="font-family:Orbitron,monospace;font-size:9px;font-weight:900;color:rgba(255,149,0,.6);letter-spacing:.1em;margin-top:2px">${t('comingSoon')}</div>
     </div>`;
   }).join('');
   container.querySelectorAll('.shop-item').forEach(el=>{
@@ -6954,18 +7653,110 @@ requestAnimationFrame(loop);
     <div class="confirm-icon" id="confirmIcon">🏓</div>
     <div class="confirm-title" id="confirmTitle">COMPRA PERMANENTE</div>
     <div class="confirm-body" id="confirmBody"></div>
-    <div class="confirm-warn">⚠️ SOLO ACTIVO EN MODO SUPERVIVENCIA</div>
+    <div class="confirm-warn" id="confirmWarnTxt">⚠️ SOLO ACTIVO EN MODO SUPERVIVENCIA</div>
     <div class="confirm-btns">
       <button class="confirm-btn-no" id="confirmNo">✕ CANCELAR</button>
       <button class="confirm-btn-yes" id="confirmYes">✓ COMPRAR</button>
     </div>
   </div>
 </div>
-<div id="rewardOverlay" style="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;top:0;left:0;width:100%;height:100%"></div>
+<div id="exitModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div style="background:linear-gradient(135deg,#080d18,#0d1525);border:1px solid rgba(0,229,255,.2);border-radius:24px;padding:32px 28px;max-width:300px;width:90%;text-align:center;box-shadow:0 0 60px rgba(0,229,255,.15)">
+    <div style="font-size:36px;margin-bottom:12px">🎾</div>
+    <div style="font-family:Orbitron,monospace;font-size:14px;font-weight:900;letter-spacing:.2em;color:#00e5ff;text-shadow:0 0 14px #00e5ff;margin-bottom:8px" id="exitTitle">¿SALIR DEL JUEGO?</div>
+    <div style="font-family:Orbitron,monospace;font-size:9px;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:28px" id="exitSub">Tu progreso se guardará</div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button id="exitCancelBtn" style="flex:1;padding:14px 8px;border-radius:12px;border:1px solid rgba(0,229,255,.3);background:rgba(0,229,255,.08);color:#00e5ff;font-family:Orbitron,monospace;font-size:10px;font-weight:900;letter-spacing:.12em;cursor:pointer">↩ VOLVER</button>
+      <button id="exitConfirmBtn" style="flex:1;padding:14px 8px;border-radius:12px;border:1px solid rgba(255,34,85,.3);background:rgba(255,34,85,.12);color:#ff2255;font-family:Orbitron,monospace;font-size:10px;font-weight:900;letter-spacing:.12em;cursor:pointer">✕ SALIR</button>
+    </div>
+  </div>
+</div>
 <script>
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
+
+// ── BACK BUTTON EXIT CONFIRMATION ──
+(function(){
+  const modal=document.getElementById('exitModal');
+  const cancelBtn=document.getElementById('exitCancelBtn');
+  const confirmBtn=document.getElementById('exitConfirmBtn');
+  const title=document.getElementById('exitTitle');
+  const sub=document.getElementById('exitSub');
+
+  function showExitModal(){
+    // Update text based on language
+    const isEn=typeof settings!=='undefined'&&settings.lang==='en';
+    title.textContent=isEn?'EXIT GAME?':'¿SALIR DEL JUEGO?';
+    sub.textContent=isEn?'Your progress will be saved':'Tu progreso se guardará';
+    cancelBtn.textContent=isEn?'↩ BACK':'↩ VOLVER';
+    confirmBtn.textContent=isEn?'✕ EXIT':'✕ SALIR';
+    modal.style.display='flex';
+  }
+
+  function hideExitModal(){
+    modal.style.display='none';
+    // Push a new state so next back press triggers again
+    history.pushState(null,'',location.href);
+  }
+
+  // Push initial state
+  history.pushState(null,'',location.href);
+
+  window.addEventListener('popstate',()=>{
+    // If any other modal/screen is open, close that instead
+    const pauseScreen=document.getElementById('pauseScr');
+    const shopModal=document.getElementById('shopModal');
+    const rankingModal=document.getElementById('rankingModal');
+    const settingsModal=document.getElementById('settingsScr');
+    const skinsPanel=document.getElementById('skinPanel');
+
+    if(shopModal&&shopModal.classList.contains('show')){
+      shopModal.classList.remove('show');
+      history.pushState(null,'',location.href);
+      return;
+    }
+    if(rankingModal&&rankingModal.classList.contains('show')){
+      rankingModal.classList.remove('show');
+      history.pushState(null,'',location.href);
+      return;
+    }
+    if(settingsModal&&settingsModal.classList.contains('show')){
+      settingsModal.classList.remove('show');
+      history.pushState(null,'',location.href);
+      return;
+    }
+    if(skinsPanel&&skinsPanel.classList.contains('show')){
+      skinsPanel.classList.remove('show');
+      history.pushState(null,'',location.href);
+      return;
+    }
+    if(pauseScreen&&pauseScreen.classList.contains('show')){
+      // Resume game instead of exiting
+      const resumeBtn=document.getElementById('resumeBtn');
+      if(resumeBtn)resumeBtn.click();
+      history.pushState(null,'',location.href);
+      return;
+    }
+    // Nothing open — show exit confirmation
+    showExitModal();
+  });
+
+  cancelBtn.addEventListener('click',hideExitModal);
+  modal.addEventListener('click',e=>{if(e.target===modal)hideExitModal();});
+
+  confirmBtn.addEventListener('click',()=>{
+    // Save and close
+    try{if(typeof save==='function')save();}catch(e){}
+    // Try to close the window (works in TWA/Capacitor/WebView)
+    if(window.Android&&window.Android.exitApp){
+      window.Android.exitApp();
+    }else{
+      window.history.go(-(window.history.length));
+      setTimeout(()=>window.close(),100);
+    }
+  });
+})();
 </script>
 </body>
 </html>
