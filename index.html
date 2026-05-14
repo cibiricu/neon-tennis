@@ -881,7 +881,7 @@ if('serviceWorker' in navigator){
       <button class="go-btn-ad" id="reviveAdBtn">💚 REVIVIR CON 3 VIDAS</button>
       <button class="go-btn-ad" id="doubleCoinsAdBtn">💰 DOBLAR MONEDAS</button>
     </div>
-    <button class="go-btn" id="goRetryBtn" style="display:none;border-color:rgba(255,149,0,.5);background:linear-gradient(135deg,rgba(255,149,0,.2),rgba(255,149,0,.08));color:#ff9500;box-shadow:0 0 24px rgba(255,149,0,.2)">💀 REINTENTAR</button>
+    <button class="go-btn" id="goRetryBtn" style="display:none;border-color:rgba(255,149,0,.5);background:linear-gradient(135deg,rgba(255,149,0,.2),rgba(255,149,0,.08));color:#ff9500;box-shadow:0 0 24px rgba(255,149,0,.2)">💀 REINTENTAR <span style="font-size:11px;opacity:.8">— 55🪙</span></button>
     <button class="go-btn" id="goMenuBtn">↩ VOLVER AL MENÚ</button>
   </div>
 </div>
@@ -1992,22 +1992,24 @@ let nitroBoosted=false; // bypass clamp after nitro
 
 function clampBallSpeed(){
   if(nitroBoosted){nitroBoosted=false;return;} // skip clamp once after nitro
-  let maxSpd;
-  if(twoPlayer) maxSpd=430;
-  else if(survivalMode) maxSpd=Math.min(280+(survivalWave-1)*90*1.1, 2020);
-  else maxSpd={easy:310,medium:400,hard:480}[diff]||400;
+  let maxSpd, minVy;
+  if(twoPlayer){
+    maxSpd=430; minVy=120;
+  }else if(survivalMode){
+    maxSpd=Math.min(280+(survivalWave-1)*90*1.1, 2020);
+    minVy=Math.min(180+(survivalWave-1)*20, 420);
+  }else{
+    maxSpd={easy:310,medium:400,hard:480}[diff]||400;
+    minVy={easy:110,medium:140,hard:170}[diff]||140;
+  }
   const spd=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
   if(spd>maxSpd){const ratio=maxSpd/spd;ball.vx*=ratio;ball.vy*=ratio}
 
-  // SURVIVAL: enforce minimum vertical speed so ball never crawls across the court
-  if(survivalMode){
-    const minVy=Math.min(180+(survivalWave-1)*20, 420);
-    if(Math.abs(ball.vy)<minVy){
-      ball.vy=(ball.vy<0?-1:1)*minVy;
-      // compensate vx so total speed stays the same
-      const newSpd=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
-      if(newSpd>maxSpd){const r=maxSpd/newSpd;ball.vx*=r;ball.vy*=r;}
-    }
+  // Enforce minimum vertical speed so ball never crawls across the court
+  if(Math.abs(ball.vy)<minVy){
+    ball.vy=(ball.vy<0?-1:1)*minVy;
+    const newSpd=Math.sqrt(ball.vx*ball.vx+ball.vy*ball.vy);
+    if(newSpd>maxSpd){const r=maxSpd/newSpd;ball.vx*=r;ball.vy*=r;}
   }
 }
 
@@ -2420,6 +2422,7 @@ let survivalMode=false;
 let survivalWave=0;
 let survivalLives=5;
 let survivalCpuBoost=1;
+let survivalRetryUsed=false; // solo 1 reintento por partida
 
 /* ═══ REPLAY ═══ */
 let replayBuffer=[];   // [{bx,by,px,py,cx} per frame]
@@ -2523,7 +2526,28 @@ function triggerGameOver(){
   // Survival: show retry, hide revive; Normal: hide retry, show revive
   if(survivalMode){
     if(goSub) goSub.textContent=`OLA ${survivalWave} — ¡A POR EL RÉCORD!`;
-    if(goRetryBtn) goRetryBtn.style.display='block';
+    if(goRetryBtn){
+      goRetryBtn.style.display='block';
+      if(survivalRetryUsed){
+        goRetryBtn.disabled=true;
+        goRetryBtn.innerHTML='💀 REINTENTAR <span style="font-size:10px;opacity:.7">— YA USADO</span>';
+        goRetryBtn.style.opacity='.35';
+        goRetryBtn.style.cursor='default';
+        goRetryBtn.style.filter='grayscale(1)';
+      }else if(coins<55){
+        goRetryBtn.disabled=true;
+        goRetryBtn.innerHTML='💀 REINTENTAR <span style="font-size:10px;opacity:.7">— 55🪙 (sin fondos)</span>';
+        goRetryBtn.style.opacity='.35';
+        goRetryBtn.style.cursor='default';
+        goRetryBtn.style.filter='grayscale(1)';
+      }else{
+        goRetryBtn.disabled=false;
+        goRetryBtn.innerHTML='💀 REINTENTAR <span style="font-size:11px;opacity:.8">— 55🪙</span>';
+        goRetryBtn.style.opacity='1';
+        goRetryBtn.style.cursor='pointer';
+        goRetryBtn.style.filter='none';
+      }
+    }
     if(reviveAdBtn) reviveAdBtn.style.display='none';
   }else{
     if(goSub) goSub.textContent='Sin vidas restantes';
@@ -4977,6 +5001,11 @@ function goToMenu(){
 menuBtn.addEventListener('click',goToMenu);
 goMenuBtn.addEventListener('click',goToMenu);
 if(goRetryBtn) goRetryBtn.addEventListener('click',()=>{
+  if(survivalRetryUsed||coins<55) return;
+  coins-=55;
+  updateCoinsUI();
+  survivalRetryUsed=true;
+  goRetryBtn.style.display='none';
   gameoverScr.classList.remove('show');
   gameoverActive=false;
   g.ps=0;g.cs=0;combo=0;
@@ -5957,7 +5986,7 @@ const survivalBtn=document.getElementById('survivalBtn');
 
 survivalBtn.addEventListener('click',()=>{
   survivalMode=true;twoPlayer=false;
-  survivalWave=0;survivalLives=5;survivalCpuBoost=1;
+  survivalWave=0;survivalLives=5;survivalCpuBoost=1;survivalRetryUsed=false;
   xpTotal=0;g.ps=0;g.cs=0;
   screenTransition(()=>startSession());
   initAudio();
