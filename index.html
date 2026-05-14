@@ -1031,7 +1031,7 @@ if('serviceWorker' in navigator){
       <button class="btn-sec" id="settingsBtn">⚙ CONFIG</button>
     </div>
     <div class="menu-row" style="margin-bottom:5px">
-      <button class="btn-sec" id="exitAppBtnMenu">⏻ SALIR</button>
+      <button class="btn-sec" id="exitAppBtnMenu" type="button">⏻ SALIR</button>
     </div>
 
     <!-- Coins -->
@@ -1152,7 +1152,7 @@ if('serviceWorker' in navigator){
     <p style="color:rgba(255,255,255,.35);margin-bottom:22px;font-size:11px;letter-spacing:.18em;font-family:'Orbitron','Courier New',monospace">EL TIEMPO SE HA DETENIDO</p>
     <button class="btn btn-play" id="resumeBtn">▶ CONTINUAR</button>
     <button class="btn" id="menuBtn">☰ MENÚ</button>
-    <button class="btn" id="exitAppBtn">⏻ SALIR</button>
+    <button class="btn" id="exitAppBtn" type="button">⏻ SALIR</button>
   </div>
 </div>
 
@@ -1215,8 +1215,6 @@ const skinSection=document.getElementById('skinSection');
 const skinScroll=document.getElementById('skinScroll');
 const resumeBtn=document.getElementById('resumeBtn');
 const menuBtn=document.getElementById('menuBtn');
-const exitAppBtn=document.getElementById('exitAppBtn');
-const exitAppBtnMenu=document.getElementById('exitAppBtnMenu');
 const freeCoinsAdBtn=document.getElementById('freeCoinsAdBtn');
 const freeHeartAdBtn=document.getElementById('freeHeartAdBtn');
 const boosterPackAdBtn=document.getElementById('boosterPackAdBtn');
@@ -4789,7 +4787,7 @@ function isUIElement(el){
     const tag=(node.tagName||'').toUpperCase();
     if(tag==='BUTTON'||tag==='INPUT'||tag==='SELECT'||tag==='A'||tag==='TEXTAREA')return true;
     const id=node.id||'';
-    if(id==='itemBar'||id==='pauseBtn'||id==='pauseScr'||id==='resumeBtn'||id==='menuBtn'||id==='exitAppBtn'||id==='exitAppBtnMenu')return true;
+    if(id==='itemBar'||id==='pauseBtn'||id==='pauseScr'||id==='resumeBtn'||id==='menuBtn'||id==='exitAppBtn'||id==='exitAppBtnMenu'||id==='ntrExitModal'||id==='ntrExitCancel'||id==='ntrExitConfirm')return true;
     node=node.parentElement;
   }
   return false;
@@ -4954,25 +4952,6 @@ pauseBtn.addEventListener('pointerdown',e=>e.stopPropagation());
 pauseBtn.addEventListener('pointerup',handlePauseButton);
 pauseBtn.addEventListener('click',handlePauseButton);
 
-function performExitApp(){
-  try{if(typeof save==='function')save();}catch(e){}
-
-  try{
-    if(window.Android&&typeof window.Android.exitApp==='function'){
-      window.Android.exitApp();
-      return;
-    }
-  }catch(e){}
-
-  try{window.close()}catch(e){}
-
-  toast('USA EL BOTÓN ATRÁS DEL MÓVIL PARA CERRAR','#ffd700');
-}
-
-function exitApp(){
-  showExitConfirm(performExitApp);
-}
-
 function goToMenu(){
   stopWinFireworks();
   winnerScr.classList.remove('show');
@@ -5001,8 +4980,6 @@ function goToMenu(){
 
 menuBtn.addEventListener('click',goToMenu);
 goMenuBtn.addEventListener('click',goToMenu);
-if(exitAppBtn)exitAppBtn.addEventListener('click',exitApp);
-if(exitAppBtnMenu)exitAppBtnMenu.addEventListener('click',exitApp);
 if(goRetryBtn) goRetryBtn.addEventListener('click',()=>{
   gameoverScr.classList.remove('show');
   gameoverActive=false;
@@ -6545,24 +6522,6 @@ function showConfirm(item,onConfirm){
   document.getElementById('confirmTitle').textContent=item.name+' — '+item.price+'🪙';
   document.getElementById('confirmBody').textContent=item.desc;
   document.getElementById('confirmYes').textContent=`✓ COMPRAR ${item.price}🪙`;
-  document.getElementById('confirmNo').textContent='✕ CANCELAR';
-  const warn=modal.querySelector('.confirm-warn');
-  if(warn){warn.style.display='block';warn.textContent='⚠️ SOLO ACTIVO EN MODO SUPERVIVENCIA'}
-  _confirmCallback=onConfirm;
-  modal.classList.add('show');
-}
-
-function showExitConfirm(onConfirm){
-  wireConfirm();
-  const modal=getConfirmModal();
-  if(!modal){onConfirm();return;}
-  document.getElementById('confirmIcon').textContent='🎾';
-  document.getElementById('confirmTitle').textContent='¿SALIR DEL JUEGO?';
-  document.getElementById('confirmBody').textContent='Tu progreso se guardará. ¿Seguro que quieres cerrar Neon Tennis Rush?';
-  document.getElementById('confirmYes').textContent='✓ SÍ, SALIR';
-  document.getElementById('confirmNo').textContent='↩ VOLVER';
-  const warn=modal.querySelector('.confirm-warn');
-  if(warn){warn.style.display='none'}
   _confirmCallback=onConfirm;
   modal.classList.add('show');
 }
@@ -6977,6 +6936,98 @@ requestAnimationFrame(loop);
     </div>
   </div>
 </div>
+
+<!-- EXIT CONFIRMATION MODAL — robust Android WebView exit flow -->
+<div id="ntrExitModal" aria-hidden="true" style="position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;background:rgba(2,0,8,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:20px;pointer-events:auto;">
+  <div style="width:min(92vw,380px);border-radius:24px;padding:24px 20px;text-align:center;background:linear-gradient(160deg,rgba(8,16,40,.99),rgba(4,9,22,.98));border:1px solid rgba(255,215,0,.35);box-shadow:0 0 45px rgba(255,215,0,.12),0 30px 90px rgba(0,0,0,.75);font-family:'Orbitron','Courier New',monospace;color:#fff;">
+    <div style="font-size:48px;line-height:1;margin-bottom:10px;filter:drop-shadow(0 0 16px rgba(255,215,0,.6));">🎾</div>
+    <div style="font-size:16px;font-weight:900;color:#ffd700;letter-spacing:.1em;margin-bottom:10px;">¿SALIR DEL JUEGO?</div>
+    <div style="font-family:'Exo 2',sans-serif;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);margin-bottom:18px;">Tu progreso se guardará antes de cerrar Neon Tennis Rush.</div>
+    <div style="display:flex;gap:10px;">
+      <button id="ntrExitCancel" type="button" style="flex:1;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:rgba(255,255,255,.78);font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:800;letter-spacing:.08em;">↩ VOLVER</button>
+      <button id="ntrExitConfirm" type="button" style="flex:1;height:48px;border-radius:14px;border:1px solid rgba(255,215,0,.55);background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(255,149,0,.10));color:#ffd700;font-family:'Orbitron','Courier New',monospace;font-size:11px;font-weight:900;letter-spacing:.08em;">✓ SÍ, SALIR</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var modal=document.getElementById('ntrExitModal');
+  var cancel=document.getElementById('ntrExitCancel');
+  var confirm=document.getElementById('ntrExitConfirm');
+  var pendingExit=false;
+
+  function saveBeforeExit(){
+    try{ if(typeof window.save==='function') window.save(); }catch(e){}
+    try{ localStorage.setItem('ntr_last_exit', String(Date.now())); }catch(e){}
+  }
+
+  function showExitConfirm(e){
+    if(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if(typeof e.stopImmediatePropagation==='function') e.stopImmediatePropagation();
+    }
+    pendingExit=true;
+    if(modal){
+      modal.style.display='flex';
+      modal.setAttribute('aria-hidden','false');
+    }
+    return false;
+  }
+
+  function hideExitConfirm(e){
+    if(e){e.preventDefault();e.stopPropagation();}
+    pendingExit=false;
+    if(modal){
+      modal.style.display='none';
+      modal.setAttribute('aria-hidden','true');
+    }
+  }
+
+  function reallyExit(e){
+    if(e){e.preventDefault();e.stopPropagation();}
+    if(!pendingExit) return;
+    saveBeforeExit();
+    try{
+      if(window.Android && typeof window.Android.exitApp==='function'){
+        window.Android.exitApp();
+        return;
+      }
+    }catch(err){}
+    try{ window.close(); }catch(err){}
+    try{
+      var toastEl=document.getElementById('toastEl');
+      if(toastEl){
+        toastEl.textContent='USA EL BOTÓN ATRÁS DEL MÓVIL PARA CERRAR';
+        toastEl.style.color='#ffd700';
+        toastEl.classList.add('show');
+        setTimeout(function(){toastEl.classList.remove('show')},2200);
+      }else{
+        alert('Usa el botón atrás del móvil para cerrar.');
+      }
+    }catch(err){ alert('Usa el botón atrás del móvil para cerrar.'); }
+  }
+
+  // Captura el click antes que cualquier otro listener antiguo que pudiera cerrar directo.
+  document.addEventListener('click', function(e){
+    var target=e.target && e.target.closest ? e.target.closest('#exitAppBtn,#exitAppBtnMenu,[data-exit-app]') : null;
+    if(target) showExitConfirm(e);
+  }, true);
+
+  document.addEventListener('pointerup', function(e){
+    var target=e.target && e.target.closest ? e.target.closest('#exitAppBtn,#exitAppBtnMenu,[data-exit-app]') : null;
+    if(target) showExitConfirm(e);
+  }, true);
+
+  if(cancel) cancel.addEventListener('click', hideExitConfirm, true);
+  if(confirm) confirm.addEventListener('click', reallyExit, true);
+  if(modal) modal.addEventListener('click', function(e){ if(e.target===modal) hideExitConfirm(e); }, true);
+
+  window.neonTennisShowExitConfirm=showExitConfirm;
+})();
+</script>
+
 <div id="rewardOverlay" style="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;top:0;left:0;width:100%;height:100%"></div>
 <script>
 if('serviceWorker' in navigator){
